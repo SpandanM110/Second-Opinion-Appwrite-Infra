@@ -67,9 +67,9 @@ export async function getCityStats(cityIds: string[]) {
 
 /** The newest questions in a city (the Feed's first tab), with their askers, for the server-rendered first paint. */
 export async function getQuestions(cityId: string) {
-  const qcs = await rest<QuoteCheck>('quote_checks', [Query.equal('city_id', cityId), Query.orderDesc('created_at'), Query.limit(30)], 5);
+  const qcs = await rest<QuoteCheck>('quote_checks', [Query.equal('city_id', cityId), Query.orderDesc('created_at'), Query.limit(30)], LOGS_CACHE);
   const ids = [...new Set(qcs.map((q) => q.user_id))];
-  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 60) : [];
+  const users = await getUsersFor(ids);
   return { qcs, users };
 }
 
@@ -78,12 +78,18 @@ export async function getGuideDismissed() {
   return (await cookies()).has(GUIDE_COOKIE);
 }
 
+// Volatile data (prices people just saved) is cached only briefly on the server, and the page revalidates it
+// in the browser right after it loads, so a price you just saved never hides behind this cache.
+const LOGS_CACHE = 20;
+
 /** The latest 5 paid/listed prices plus up to 3 first quotes, so quotes never sit unexplained among fair prices. */
-export async function getRecentLogs(itemId: string, cityId: string, localityId: string | null) {
+export async function getLogs(itemId: string, cityId: string, localityId: string | null) {
   const q = [Query.equal('city_id', cityId), Query.equal('item_id', itemId), Query.orderDesc('created_at'), Query.limit(24)];
   if (localityId) q.push(Query.equal('locality_id', localityId));
-  const logs = splitRecent(await rest<PriceLog>('price_logs', q, 5));
-  const ids = [...new Set(logs.map((l) => l.user_id))];
-  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 60) : [];
-  return { logs, users };
+  return splitRecent(await rest<PriceLog>('price_logs', q, LOGS_CACHE));
+}
+
+export async function getUsersFor(userIds: string[]) {
+  const ids = [...new Set(userIds)];
+  return ids.length ? rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 120) : [];
 }

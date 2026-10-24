@@ -12,7 +12,11 @@
     "stats": "node scripts/with-key.mjs node scripts/recompute.mjs",
     "deploy:functions": "npm run sync:core && appwrite push functions --all --force",
     "deploy:web": "npm run sync:core && appwrite push sites --all --force",
-    "test:e2e": "node scripts/with-key.mjs npx tsx scripts/e2e-backend.ts"
+    "test:e2e": "node scripts/with-key.mjs npx tsx scripts/e2e-backend.ts",
+    "warm": "node scripts/warm.mjs",
+    "test:ui": "node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts",
+    "a11y": "node scripts/a11y.mjs",
+    "perf": "node scripts/perf.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

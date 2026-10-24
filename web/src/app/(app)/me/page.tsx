@@ -1,4 +1,4 @@
-import { MePage } from '../../views/MePage';
+import { MePage } from '@/views/MePage';
 
 export const metadata = { title: 'Me' };
 

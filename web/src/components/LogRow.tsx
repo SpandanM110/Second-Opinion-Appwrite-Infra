@@ -14,7 +14,7 @@ const TYPE_STYLE = {
   listed: 'bg-scope-city-soft text-scope-city',
 } as const;
 
-/** One price log. Hidden logs stay visible, greyed, with an "under review" tag. */
+/** One price. Hidden prices stay visible, greyed, with an "under review" tag. */
 export function LogRow({ log, author, showItem = false, hideLocality = false }: { log: PriceLog; author?: UserRow; showItem?: boolean; hideLocality?: boolean }) {
   const ref = useRefData();
   const item = ref.item(log.item_id);
@@ -35,7 +35,7 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
           <span className={`rounded-full px-2 py-px text-[12px] font-semibold ${TYPE_STYLE[log.price_type]}`}>{log.price_type}</span>
           {!hideLocality && (
             <>
-              <span className="truncate">{locality?.name ?? `${ref.city(log.city_id)?.name ?? ''}, area not set`}</span>
+              <span className="truncate">{locality?.name ?? `somewhere in ${ref.city(log.city_id)?.name ?? 'the city'}`}</span>
               <span aria-hidden>·</span>
             </>
           )}
@@ -60,11 +60,21 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
           )}
           {log.hidden && (
             <span className="inline-flex items-center gap-1 font-semibold text-warn">
-              <EyeOff size={13} aria-hidden /> under review ({log.flag_count} flags)
+              <EyeOff size={13} aria-hidden /> under review ({log.flag_count} {log.flag_count === 1 ? 'flag' : 'flags'})
             </span>
           )}
         </p>
       </div>
     </li>
+  );
+}
+
+/** The three price types, explained once in plain words wherever a list mixes them. */
+export function PriceTypeHelp() {
+  return (
+    <p className="text-[12px] leading-relaxed text-faint">
+      <b className="font-semibold text-high">paid</b> = what they handed over · <b className="font-semibold text-warn">quoted</b> = what they were asked first ·{" "}
+      <b className="font-semibold text-scope-city">listed</b> = on a board or menu
+    </p>
   );
 }

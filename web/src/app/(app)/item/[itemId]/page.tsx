@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { CardSkeleton } from '../../../components/States';
-import { rupees } from '../../../lib/format';
-import { getCard, getPlaceCookie, getRecentLogs, getRefData } from '../../../lib/server';
-import { ItemPage, type ItemInitial } from '../../../views/ItemPage';
+import { CardSkeleton } from '@/components/States';
+import { rupees } from '@/lib/format';
+import { getCard, getGuideDismissed, getPlaceCookie, getRecentLogs, getRefData } from '@/lib/server';
+import { ItemPage, type ItemInitial } from '@/views/ItemPage';
 
 type Props = { params: Promise<{ itemId: string }>; searchParams: Promise<{ c?: string; l?: string }> };
 
@@ -41,6 +41,7 @@ export default async function Page(props: Props) {
     card: { card, fetchedAt: result.fetchedAt, stale: false },
     logs,
     users,
+    guideDismissed: await getGuideDismissed(),
   };
   return (
     <Suspense fallback={<CardSkeleton />}>

@@ -87,7 +87,7 @@ test('card uses locality when it has ≥5 weighted logs', () => {
   assert.equal(card.scope.type, 'locality');
   assert.equal(card.scope.label, 'in MP Nagar');
   assert.equal(card.confidence.level, 'high');
-  assert.equal(card.sample.line, '30 logs from 9 people in the last 40 days');
+  assert.equal(card.sample.line, '30 prices from 9 people in the last 40 days');
 });
 
 test('thin locality falls back to city and caps High at Medium', () => {
@@ -114,7 +114,7 @@ test('no rows → no_data; thin rows → Low rough guide', () => {
   assert.equal(buildCard({ item, hyperlocal: true, city, locality, rows: [], now: NOW }).status, 'no_data');
   const thin = buildCard({ item, hyperlocal: true, city, locality, rows: [row({ n_weighted: 2, n_raw: 3, confidence: 'low' })], now: NOW });
   assert.equal(thin.confidence.level, 'low');
-  assert.equal(thin.confidence.reason, 'only 3 logs so far');
+  assert.equal(thin.confidence.reason, 'only 3 prices so far');
 });
 
 test('geo: snaps to locality within 3 km, else city only', () => {

@@ -7,6 +7,7 @@ import { band, Price } from './Price';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import { ScopeChip } from './ScopeChip';
 import { RangeBar } from './RangeBar';
+import { UseIt } from './UseIt';
 
 interface Actions {
   onPaid: () => void;
@@ -37,9 +38,9 @@ export function FairRangeCard({ card, staleSince, actions }: { card: Card; stale
 
       {card.status === 'ok' && (
         <div className="grid grid-cols-3 border-t border-line">
-          <ActionButton onClick={actions.onPaid} icon={<PenLine size={18} />} label="I paid" primary />
+          <ActionButton onClick={actions.onPaid} icon={<PenLine size={18} />} label="Add my price" primary />
           <ActionButton onClick={actions.onAsk} icon={<MessageCircleQuestion size={18} />} label="Ask locals" />
-          <ActionButton onClick={actions.onCompare} icon={<ArrowLeftRight size={18} />} label="Compare" />
+          <ActionButton onClick={actions.onCompare} icon={<ArrowLeftRight size={18} />} label="Other cities" />
         </div>
       )}
     </article>
@@ -64,17 +65,19 @@ function Body({ card }: { card: CardOk }) {
 
       <ConfidenceBadge level={confidence.level} reason={confidence.reason} />
 
+      <UseIt card={card} />
+
       {card.overcharge && (
         <p className="flex items-start gap-2 rounded-xl bg-warn-soft px-3 py-2.5 text-[14px] text-warn">
           <AlertTriangle size={17} className="mt-px shrink-0" aria-hidden />
           <span>
-            <span className="font-semibold">First quotes here average {card.overcharge.index.toFixed(1)}x</span> the fair rate. Expect to bargain.
+            <span className="font-semibold">First quotes here average {card.overcharge.index.toFixed(1)}x</span> the fair price. Expect to bargain.
           </span>
         </p>
       )}
 
       <p className="flex items-center gap-1.5 text-[12px] text-faint">
-        <Clock size={13} aria-hidden /> Updated {timeAgo(card.computedAt)} · newest log {timeAgo(card.sample.newestLogAt)}
+        <Clock size={13} aria-hidden /> Newest price {timeAgo(card.sample.newestLogAt)}
       </p>
     </>
   );

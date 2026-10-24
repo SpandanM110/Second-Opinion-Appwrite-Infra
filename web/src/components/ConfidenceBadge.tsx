@@ -5,15 +5,15 @@ import { ShieldCheck, ShieldHalf, ShieldQuestion, ChevronDown } from 'lucide-rea
 import type { Confidence } from '../lib/types';
 
 const STYLE: Record<Confidence, { label: string; cls: string; Icon: typeof ShieldCheck }> = {
-  high: { label: 'High', cls: 'bg-high-soft text-high', Icon: ShieldCheck },
-  medium: { label: 'Medium', cls: 'bg-medium-soft text-medium', Icon: ShieldHalf },
-  low: { label: 'Low', cls: 'bg-low-soft text-low', Icon: ShieldQuestion },
+  high: { label: 'High confidence', cls: 'bg-high-soft text-high', Icon: ShieldCheck },
+  medium: { label: 'Medium confidence', cls: 'bg-medium-soft text-medium', Icon: ShieldHalf },
+  low: { label: 'Low confidence', cls: 'bg-low-soft text-low', Icon: ShieldQuestion },
 };
 
 const MEANING: Record<Confidence, string> = {
-  high: 'High: at least 15 weighted logs from 3+ people, a tight range, and a log in the last 30 days.',
-  medium: 'Medium: enough logs to trust the ballpark, but the sample is smaller, wider or older than High needs.',
-  low: 'Low: too few logs to be sure. Treat it as a rough guide, and add what you paid.',
+  high: 'High confidence: plenty of recent prices from at least 3 people, tightly grouped. Safe to negotiate from.',
+  medium: 'Medium confidence: a solid ballpark, but fewer, older or more spread-out prices than High needs.',
+  low: 'Low confidence: too few prices to be sure. Treat it as a rough guide, and add what you paid.',
 };
 
 export function ConfidenceDot({ level }: { level: Confidence }) {
@@ -29,7 +29,8 @@ export function ConfidenceBadge({ level, reason, compact = false }: { level: Con
   if (compact) {
     return (
       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-semibold ${cls}`}>
-        <Icon size={13} aria-hidden /> {label}
+        <Icon size={13} aria-hidden /> {label.replace(' confidence', '')}
+        <span className="sr-only"> confidence</span>
       </span>
     );
   }
@@ -51,9 +52,21 @@ export function ConfidenceBadge({ level, reason, compact = false }: { level: Con
       </button>
       {open && (
         <p id={id} className="mt-1 rounded-xl bg-canvas px-3 py-2 text-[13px] leading-relaxed text-muted">
-          {MEANING[level]} Logs from trusted locals, with receipts, and confirmed by neighbours count for more; old logs fade over about a month.
+          {MEANING[level]} Prices from trusted locals, with receipts, and confirmed by neighbours count for more; older prices fade over about a month.
         </p>
       )}
     </div>
+  );
+}
+
+/** One line under a list that uses the dots, so the colours mean something. */
+export function ConfidenceLegend() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-faint">
+      <span>The dot shows how much to trust each price:</span>
+      <span className="inline-flex items-center gap-1.5"><ConfidenceDot level="high" /> high</span>
+      <span className="inline-flex items-center gap-1.5"><ConfidenceDot level="medium" /> medium</span>
+      <span className="inline-flex items-center gap-1.5"><ConfidenceDot level="low" /> low</span>
+    </p>
   );
 }

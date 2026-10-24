@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeftRight, ChevronRight, Clock, LocateFixed, Loader2 } from 'lucide-react';
+import { ArrowLeftRight, ChevronRight, Clock } from 'lucide-react';
 import { UNIT_LABEL } from '../core/card.js';
 import { CategoryIcon } from '../components/CategoryIcon';
-import { ConfidenceDot } from '../components/ConfidenceBadge';
+import { ConfidenceDot, ConfidenceLegend } from '../components/ConfidenceBadge';
 import { ItemSearch } from '../components/ItemSearch';
 import { PlaceChip } from '../components/PlacePicker';
 import { Price } from '../components/Price';
@@ -15,6 +15,8 @@ import { recentItems } from '../lib/recent';
 import { useRefData } from '../lib/ref';
 import type { Item, PriceStat } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
+
+const SHOWN = 3;
 
 export function CheckPage({ initialStats }: { initialStats?: { cityId: string; rows: PriceStat[] } }) {
   const ref = useRefData();
@@ -26,6 +28,7 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
     initialStats && initialStats.cityId === cityId ? initialStats.rows : undefined,
   );
   const stats = useMemo(() => new Map((statsQ.data ?? []).map((s) => [s.item_id, s])), [statsQ.data]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // Recents live in localStorage, so they appear after hydration.
   const [recents, setRecents] = useState<Item[]>([]);
   useEffect(() => setRecents(recentItems().map((id) => ref.item(id)).filter((x) => x !== undefined)), [ref]);
@@ -36,14 +39,8 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
         <h1 className="text-[28px] font-bold leading-tight tracking-tight sm:text-[36px]">Check before you pay.</h1>
         <p className="mt-1 text-[16px] text-muted sm:text-[18px]">What locals really paid, near you, this month.</p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4">
           <PlaceChip />
-          {place.source === 'default' && (
-            <button type="button" onClick={place.locate} className="btn-ghost h-11 px-3 text-[14px]" disabled={place.status === 'locating'}>
-              {place.status === 'locating' ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <LocateFixed size={16} aria-hidden />}
-              Use my location
-            </button>
-          )}
         </div>
         {place.status === 'denied' && <p className="mt-2 text-[13px] text-muted">Location is off. Tap the area chip to pick where you are.</p>}
         {place.status === 'outside' && <p className="mt-2 text-[13px] text-muted">We cover Bhopal, Indore and Mumbai for now. Showing {place.city?.name}.</p>}
@@ -69,21 +66,27 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
         )}
       </section>
 
-      <section aria-labelledby="popular" className="space-y-6">
-        <div className="flex items-end justify-between gap-2">
-          <h2 id="popular" className="text-[18px] font-semibold">
-            Typical prices in {place.city?.name ?? '…'}
-          </h2>
-          <Link href="/compare" className="tap inline-flex items-center gap-1 text-[14px] font-semibold text-accent-ink hover:underline">
-            <ArrowLeftRight size={15} aria-hidden /> Compare cities
-          </Link>
+      <section aria-labelledby="popular" className="space-y-5">
+        <div>
+          <div className="flex items-end justify-between gap-2">
+            <h2 id="popular" className="text-[18px] font-semibold">
+              Fair prices in {place.city?.name ?? '…'}
+            </h2>
+            <Link href="/compare" className="tap inline-flex items-center gap-1 text-[14px] font-semibold text-accent-ink hover:underline">
+              <ArrowLeftRight size={15} aria-hidden /> Other cities
+            </Link>
+          </div>
+          <div className="mt-1">
+            <ConfidenceLegend />
+          </div>
         </div>
         {!ref.ready && <GridSkeleton />}
         {ref.categories.map((cat) => {
-          const items = ref.items.filter((i) => i.category_id === cat.$id);
+          const all = ref.items.filter((i) => i.category_id === cat.$id);
+          const items = expanded[cat.$id] ? all : all.slice(0, SHOWN);
           return (
             <div key={cat.$id}>
-              <h3 className="mb-2 flex items-center gap-2 text-[14px] font-semibold text-muted">
+              <h3 className="sticky top-14 z-10 -mx-4 mb-2 flex items-center gap-2 bg-canvas/95 px-4 py-2 text-[14px] font-semibold text-muted backdrop-blur">
                 <CategoryIcon categoryId={cat.$id} size={16} /> {cat.name}
               </h3>
               <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">
@@ -112,24 +115,14 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
                   );
                 })}
               </ul>
+              {all.length > SHOWN && (
+                <button type="button" onClick={() => setExpanded((e) => ({ ...e, [cat.$id]: !e[cat.$id] }))} className="btn-ghost mt-1 h-11 w-full text-[14px]" aria-expanded={Boolean(expanded[cat.$id])}>
+                  {expanded[cat.$id] ? 'Show fewer' : `Show all ${all.length} in ${cat.name.toLowerCase()}`}
+                </button>
+              )}
             </div>
           );
         })}
-      </section>
-
-      <section className="mt-10 grid gap-3 sm:grid-cols-3" aria-label="How it works">
-        {[
-          ['Check', 'See the fair range for this exact item, in this exact area, before you pay.'],
-          ['Log', 'Tell us what you actually paid. Receipts and a good track record count for more.'],
-          ['Verify', 'Locals confirm or flag numbers. Three flags and a bad number is out.'],
-        ].map(([t, d], i) => (
-          <div key={t} className="rounded-2xl bg-surface/60 p-4">
-            <p className="text-[13px] font-semibold text-accent-ink">
-              {i + 1}. {t}
-            </p>
-            <p className="mt-1 text-[14px] text-muted">{d}</p>
-          </div>
-        ))}
       </section>
     </div>
   );

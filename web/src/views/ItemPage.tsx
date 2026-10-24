@@ -4,14 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Code2, Copy, Check } from 'lucide-react';
+import { CardGuide } from '../components/CardGuide';
 import { FairRangeCard } from '../components/FairRangeCard';
-import { LogRow } from '../components/LogRow';
+import { LogRow, PriceTypeHelp } from '../components/LogRow';
 import { PlaceChip } from '../components/PlacePicker';
 import { SignInSheet } from '../components/SignInSheet';
 import { CardSkeleton, Empty, ErrorState, ListSkeleton } from '../components/States';
 import { FAIR_RANGE_URL } from '../lib/appwrite';
 import { usePlace } from '../lib/place';
-import { fetchCard, fetchRecentLogs, fetchUsers, type CardResult } from '../lib/queries';
+import { fetchCard, fetchRecentPrices, fetchUsers, type CardResult } from '../lib/queries';
 import { pushRecent } from '../lib/recent';
 import { useRefData } from '../lib/ref';
 import type { PriceLog, UserRow } from '../lib/types';
@@ -19,7 +20,7 @@ import { useAsync } from '../lib/useAsync';
 import { NotFound } from './NotFound';
 
 /** Server-rendered first paint for one place; reused only while the client is still on that place. */
-export interface ItemInitial { placeKey: string; card: CardResult; logs: PriceLog[]; users: UserRow[] }
+export interface ItemInitial { placeKey: string; card: CardResult; logs: PriceLog[]; users: UserRow[]; guideDismissed: boolean }
 
 export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemInitial }) {
   const params = useSearchParams();
@@ -52,7 +53,7 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
 
   const logsQ = useAsync(async () => {
     if (!item || !city) return { logs: [], users: new Map() };
-    const logs = await fetchRecentLogs({ itemId: item.$id, cityId: city.$id, localityId: scopeLocality, limit: 5 });
+    const logs = await fetchRecentPrices({ itemId: item.$id, cityId: city.$id, localityId: scopeLocality });
     return { logs, users: await fetchUsers(logs.map((l) => l.user_id)) };
   }, [item?.$id, city?.$id, scopeLocality], seed ? { logs: seed.logs, users: new Map(seed.users.map((u) => [u.$id, u])) } : undefined);
 
@@ -63,7 +64,7 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Link href="/" className="tap -ml-2 inline-flex items-center gap-1 rounded-lg px-2 text-[15px] font-medium text-muted hover:text-ink">
+        <Link href="/check" className="tap -ml-2 inline-flex items-center gap-1 rounded-lg px-2 text-[15px] font-medium text-muted hover:text-ink">
           <ArrowLeft size={18} aria-hidden /> All items
         </Link>
         {!urlCity && <PlaceChip />}
@@ -82,6 +83,7 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
         <div className="space-y-3">
           {!card && cardQ.status === 'loading' && <CardSkeleton />}
           {!card && cardQ.status === 'error' && ref.ready && <ErrorState message="Couldn’t load the fair range." onRetry={cardQ.reload} />}
+          {card?.status === 'ok' && <CardGuide defaultOpen={!(initial?.guideDismissed ?? true)} />}
           {card && (
             <FairRangeCard
               card={card}
@@ -99,25 +101,45 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
           <section className="panel p-4" aria-labelledby="recent-logs">
             <div className="flex items-baseline justify-between">
               <h2 id="recent-logs" className="text-[16px] font-semibold">
-                Recent logs {scopeLocality && locality ? `in ${locality.name}` : city ? `in ${city.name}` : ''}
+                Recent prices {scopeLocality && locality ? `in ${locality.name}` : city ? `in ${city.name}` : ''}
               </h2>
               <Link href="/feed?tab=logs" className="tap inline-flex items-center justify-end text-[14px] font-semibold text-accent-ink hover:underline">
                 See all
               </Link>
             </div>
             {logsQ.status === 'loading' && !logsQ.data && <ListSkeleton rows={3} />}
-            {logsQ.status === 'error' && <p className="py-3 text-[14px] text-muted">Couldn’t load recent logs.</p>}
+            {logsQ.status === 'error' && <p className="py-3 text-[14px] text-muted">Couldn’t load recent prices.</p>}
             {logsQ.data && logsQ.data.logs.length === 0 && (
               <div className="pt-3">
-                <Empty title="No logs here yet">Be the first to log what you paid.</Empty>
+                <Empty title="No prices here yet">Be the first to share what you paid.</Empty>
               </div>
             )}
             {logsQ.data && logsQ.data.logs.length > 0 && (
-              <ul className="divide-y divide-line">
-                {logsQ.data.logs.map((l) => (
-                  <LogRow key={l.$id} log={l} author={logsQ.data!.users.get(l.user_id)} hideLocality={Boolean(scopeLocality)} />
-                ))}
-              </ul>
+              <>
+                <div className="mt-2">
+                  <PriceTypeHelp />
+                </div>
+                <ul className="divide-y divide-line">
+                  {logsQ.data.logs
+                    .filter((l) => l.price_type !== 'quoted')
+                    .map((l) => (
+                      <LogRow key={l.$id} log={l} author={logsQ.data!.users.get(l.user_id)} hideLocality={Boolean(scopeLocality)} />
+                    ))}
+                </ul>
+                {logsQ.data.logs.some((l) => l.price_type === 'quoted') && (
+                  <div className="mt-3 rounded-xl bg-warn-soft/60 px-3 pb-1 pt-3">
+                    <h3 className="text-[14px] font-semibold text-warn">First quotes people were given here</h3>
+                    <p className="text-[12px] text-muted">Not fair prices: what sellers asked before any bargaining.</p>
+                    <ul className="divide-y divide-line/70">
+                      {logsQ.data.logs
+                        .filter((l) => l.price_type === 'quoted')
+                        .map((l) => (
+                          <LogRow key={l.$id} log={l} author={logsQ.data!.users.get(l.user_id)} hideLocality={Boolean(scopeLocality)} />
+                        ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
           </section>
 

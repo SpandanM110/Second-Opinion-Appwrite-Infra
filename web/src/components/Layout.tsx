@@ -3,33 +3,41 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ArrowLeftRight, Code2, Home, Newspaper, UserRound } from 'lucide-react';
-import { FAIR_RANGE_URL } from '../lib/appwrite';
+import { ArrowLeftRight, CircleHelp, Home, Newspaper, UserRound } from 'lucide-react';
 import { useRefData } from '../lib/ref';
+import { Logo } from './Logo';
 
 const TABS = [
-  { to: '/', label: 'Check', Icon: Home },
+  { to: '/check', label: 'Check', Icon: Home },
   { to: '/feed', label: 'Feed', Icon: Newspaper },
   { to: '/compare', label: 'Compare', Icon: ArrowLeftRight },
   { to: '/me', label: 'Me', Icon: UserRound },
 ];
 
-const isActive = (pathname: string, to: string) => (to === '/' ? pathname === '/' || pathname.startsWith('/item') : pathname.startsWith(to));
+const isActive = (pathname: string, to: string) => (to === '/check' ? pathname.startsWith('/check') || pathname.startsWith('/item') : pathname.startsWith(to));
 
 export function Layout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const ref = useRefData();
 
   return (
-    <div className="min-h-dvh pb-[calc(env(safe-area-inset-bottom)+96px)] md:pb-6">
+    <div className="min-h-dvh pb-[calc(env(safe-area-inset-bottom)+84px)] md:pb-6">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
       </a>
       <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
-          <Link href="/" className="tap flex items-center gap-2 font-semibold tracking-tight" aria-label="Second Opinion, home">
+        <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:gap-4">
+          <Link href="/check" className="tap flex items-center gap-2 font-semibold tracking-tight" aria-label="Second Opinion, home">
             <Logo />
             <span className="text-[17px]">Second Opinion</span>
+          </Link>
+          <Link
+            href="/about#data"
+            className="inline-flex h-6 items-center rounded-full bg-low-soft px-2 text-[11px] font-semibold text-low hover:bg-line"
+            title="This is demo data. Tap to see how it was made."
+          >
+            <span className="sm:hidden">Demo</span>
+            <span className="hidden sm:inline">Demo data</span>
           </Link>
           <nav className="ml-auto hidden items-center gap-1 md:flex" aria-label="Main">
             {TABS.map(({ to, label }) => (
@@ -42,10 +50,13 @@ export function Layout({ children }: { children: ReactNode }) {
                 {label}
               </Link>
             ))}
-            <a href={`${FAIR_RANGE_URL}/`} target="_blank" rel="noreferrer" className="tap inline-flex items-center gap-1.5 rounded-lg px-3 text-[15px] font-medium text-muted hover:text-ink">
-              <Code2 size={16} aria-hidden /> API
-            </a>
+            <Link href="/about" className="tap inline-flex items-center rounded-lg px-3 text-[15px] font-medium text-muted hover:text-ink">
+              What is this?
+            </Link>
           </nav>
+          <Link href="/about" className="tap ml-auto inline-flex items-center justify-center rounded-lg text-muted hover:text-ink md:hidden" aria-label="What is this?">
+            <CircleHelp size={22} aria-hidden />
+          </Link>
         </div>
       </header>
 
@@ -59,15 +70,27 @@ export function Layout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+60px)] z-20 md:static md:mx-auto md:mt-12 md:max-w-5xl md:px-4">
-        <p className="mx-auto w-fit max-w-[calc(100%-16px)] rounded-t-lg bg-ink/85 px-3 py-1 text-center text-[12px] text-white md:max-w-none md:rounded-lg md:bg-transparent md:text-faint">
-          <span className="sm:hidden">Demo data, real logs start now.</span>
-          <span className="hidden sm:inline">Demo data for the hackathon; real logs start now.</span>{' '}
-          <a className="underline underline-offset-2" href="https://github.com/SpandanM110/Second-Opinion-Appwrite-Infra#demo-data" target="_blank" rel="noreferrer">
+      <footer className="mx-auto mt-12 max-w-5xl px-4 text-center text-[13px] text-faint">
+        <p>
+          Demo data for the hackathon; real prices start now.{' '}
+          <Link className="underline underline-offset-2" href="/about#data">
             How it was made
+          </Link>
+        </p>
+        <p className="mt-1">
+          <Link className="underline underline-offset-2" href="/about">
+            What is this?
+          </Link>
+          {' · '}
+          <Link className="underline underline-offset-2" href="/about#developers">
+            API
+          </Link>
+          {' · '}
+          <a className="underline underline-offset-2" href="https://github.com/SpandanM110/Second-Opinion-Appwrite-Infra" target="_blank" rel="noreferrer">
+            GitHub
           </a>
         </p>
-      </div>
+      </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Main">
         <ul className="grid h-[60px] grid-cols-4">
@@ -89,16 +112,5 @@ export function Layout({ children }: { children: ReactNode }) {
         </ul>
       </nav>
     </div>
-  );
-}
-
-export function Logo({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="8" fill="#3730a3" />
-      <rect x="5" y="14" width="22" height="4" rx="2" fill="#818cf8" />
-      <rect x="10" y="12.5" width="12" height="7" rx="3.5" fill="#c7d2fe" />
-      <rect x="15" y="8" width="2.5" height="16" rx="1.25" fill="#fff" />
-    </svg>
   );
 }

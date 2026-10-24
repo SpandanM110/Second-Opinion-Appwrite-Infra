@@ -47,7 +47,7 @@ export function ProfilePage({ id }: { id: string }) {
 
         <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
           {[
-            ['Logs', user.log_count],
+            ['Prices shared', user.log_count],
             ['Confirmed by others', user.confirmations_received],
             ['Flags received', user.flags_received],
           ].map(([k, v]) => (
@@ -61,7 +61,7 @@ export function ProfilePage({ id }: { id: string }) {
 
       <section className="panel px-4" aria-labelledby="their-logs">
         <h2 id="their-logs" className="pt-4 text-[16px] font-semibold">
-          Recent logs
+          Recent prices
         </h2>
         <ul className="divide-y divide-line">
           {logs.map((l) => (
@@ -90,7 +90,7 @@ function Reputation({ user }: { user: UserRow }) {
       </div>
       <p className="mt-2 text-[13px] text-muted">
         Goes up 0.1 each time a neighbour confirms one of their prices, down 0.3 for each flag. Higher reputation moves the range more.
-        {user.log_count < 10 && ' New accounts count at half weight until their 10th log.'}
+        {user.log_count < 10 && ' New accounts count at half weight until their 10th price.'}
       </p>
     </div>
   );

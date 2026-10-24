@@ -111,6 +111,8 @@ export function ComparePage({ itemId = 'auto-per-km' }: { itemId?: string }) {
         })}
       </div>
 
+      <p className="-mt-3 text-center text-[12px] text-faint">The badge on each card shows how much to trust that city's number.</p>
+
       {ca?.status === 'ok' && cb?.status === 'ok' && a && b && (
         <p className={`rounded-xl px-4 py-3 text-center text-[16px] ${comparable ? 'bg-accent-soft font-semibold text-accent-ink' : 'bg-low-soft text-low'}`} role="status">
           {comparable ? ratioLine(ca.range.median, cb.range.median, a.name, b.name) : whyNot}

@@ -18,7 +18,7 @@ export function parseCard(json: string | null): Card | null {
   }
 }
 
-/** A Quote Check in the feed: the quote, where it lands against the attached range, and the reply count. */
+/** A question in the feed ("is ₹X fair?"): the quote, where it lands against the attached range, and the reply count. */
 export function QuoteCheckItem({ qc, asker }: { qc: QuoteCheck; asker?: UserRow }) {
   const ref = useRefData();
   const item = ref.item(qc.item_id);
@@ -44,7 +44,7 @@ export function QuoteCheckItem({ qc, asker }: { qc: QuoteCheck; asker?: UserRow 
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
           {card?.status === 'ok' && (
             <span className="num">
-              Fair: <span className="font-semibold text-ink">{band(card.range.p25, card.range.p75)}</span>
+              Fair price: <span className="font-semibold text-ink">{band(card.range.p25, card.range.p75)}</span>
             </span>
           )}
           <span className="inline-flex items-center gap-1">

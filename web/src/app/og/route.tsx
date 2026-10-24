@@ -43,7 +43,7 @@ export async function GET(req: Request) {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', marginTop: 60, fontSize: 56, fontWeight: 700, lineHeight: 1.2 }}>Check before you pay. What locals really paid, near you.</div>
+          <div style={{ display: 'flex', marginTop: 60, fontSize: 56, fontWeight: 700, lineHeight: 1.2 }}>Know the fair price before you pay. What locals really paid, near you.</div>
         )}
       </div>
     ),

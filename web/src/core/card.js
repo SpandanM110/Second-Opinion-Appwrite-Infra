@@ -28,26 +28,26 @@ const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export function sampleLine(row, now = new Date()) {
   const days = Math.max(1, Math.ceil((now - new Date(row.oldest_log_at ?? row.newest_log_at)) / DAY_MS));
-  return `${plural(row.n_raw, 'log')} from ${plural(row.distinct_users, 'person', 'people')} in the last ${Math.min(days, WINDOW_DAYS)} days`;
+  return `${plural(row.n_raw, 'price')} from ${plural(row.distinct_users, 'person', 'people')} in the last ${Math.min(days, WINDOW_DAYS)} days`;
 }
 
-/** One-line, plain-language reason for the badge ("only 4 logs so far"). */
+/** One-line, plain-language reason for the badge ("only 4 prices so far"). */
 export function confidenceReason(row, level, now = new Date()) {
   if (level === 'high') return sampleLine(row, now);
   const newestDays = Math.floor((now - new Date(row.newest_log_at)) / DAY_MS);
   const spread = row.p25 > 0 ? row.p75 / row.p25 : Infinity;
-  if (row.n_weighted < MIN_SCOPE_WEIGHT) return `only ${plural(row.n_raw, 'log')} so far`;
+  if (row.n_weighted < MIN_SCOPE_WEIGHT) return `only ${plural(row.n_raw, 'price')} so far`;
   if (row.distinct_users < 2) return 'only one person has logged this';
   if (row.distinct_users < 3 && level === 'medium') return `only ${row.distinct_users} people have logged this`;
   if (spread > 1.5) return 'prices vary a lot here';
-  if (newestDays > 30) return `newest log is ${newestDays} days old`;
-  if (row.n_weighted < 15) return `${plural(row.n_raw, 'log')} so far, more will tighten it`;
+  if (newestDays > 30) return `newest price is ${newestDays} days old`;
+  if (row.n_weighted < 15) return `${plural(row.n_raw, 'price')} so far, more will tighten it`;
   return sampleLine(row, now);
 }
 
 export function overchargeLine(index) {
   if (index == null || index < 1.2) return null;
-  return `first quotes here average ${index.toFixed(1)}x the fair rate`;
+  return `first quotes here average ${index.toFixed(1)}x the fair price`;
 }
 
 /**

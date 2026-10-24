@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { ComparePage } from '../../../views/ComparePage';
+import { ComparePage } from '@/views/ComparePage';
 
 export const metadata = { title: 'Compare cities' };
 

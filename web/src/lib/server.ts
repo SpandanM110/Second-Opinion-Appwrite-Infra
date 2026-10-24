@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { Query } from 'appwrite';
 import { buildCard, stateIdOf } from '../core/card.js';
 import { DB, ENDPOINT, PROJECT_ID } from './appwrite';
+import { splitRecent } from './recentPrices';
 import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, UserRow } from './types';
 
 // Server-side reads: plain REST calls so Next's fetch cache can hold reference data.
@@ -64,10 +65,16 @@ export async function getCityStats(cityIds: string[]) {
   return rest<PriceStat>('price_stats', [Query.equal('scope_type', 'city'), Query.equal('scope_id', cityIds), Query.limit(200)], 60);
 }
 
+export const GUIDE_COOKIE = 'so_guide';
+export async function getGuideDismissed() {
+  return (await cookies()).has(GUIDE_COOKIE);
+}
+
+/** The latest 5 paid/listed prices plus up to 3 first quotes, so quotes never sit unexplained among fair prices. */
 export async function getRecentLogs(itemId: string, cityId: string, localityId: string | null) {
-  const q = [Query.equal('city_id', cityId), Query.equal('item_id', itemId), Query.orderDesc('created_at'), Query.limit(5)];
+  const q = [Query.equal('city_id', cityId), Query.equal('item_id', itemId), Query.orderDesc('created_at'), Query.limit(24)];
   if (localityId) q.push(Query.equal('locality_id', localityId));
-  const logs = await rest<PriceLog>('price_logs', q, 30);
+  const logs = splitRecent(await rest<PriceLog>('price_logs', q, 30));
   const ids = [...new Set(logs.map((l) => l.user_id))];
   const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 300) : [];
   return { logs, users };

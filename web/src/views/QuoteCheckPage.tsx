@@ -10,7 +10,7 @@ import { parseCard } from '../components/QuoteCheckItem';
 import { SignInSheet } from '../components/SignInSheet';
 import { ErrorState, ListSkeleton } from '../components/States';
 import { client, DB } from '../lib/appwrite';
-import { timeAgo, verdict } from '../lib/format';
+import { rupees, timeAgo, verdict } from '../lib/format';
 import { fetchQuoteCheck, fetchReplies, fetchUsers } from '../lib/queries';
 import { useRefData } from '../lib/ref';
 import type { Reply, UserRow } from '../lib/types';
@@ -57,7 +57,7 @@ export function QuoteCheckPage({ id }: { id: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (q.status === 'error' && !q.data) return <ErrorState message="Couldn’t load this Quote Check." onRetry={q.reload} />;
+  if (q.status === 'error' && !q.data) return <ErrorState message="Couldn’t load this question." onRetry={q.reload} />;
   const qc = q.data;
   if (!qc) return <ListSkeleton rows={5} />;
 
@@ -77,12 +77,12 @@ export function QuoteCheckPage({ id }: { id: string }) {
 
       <article className="panel space-y-4 p-4 sm:p-6">
         <p className="text-[14px] text-faint">
-          Quote Check · {item?.name} · {locality?.name ?? city?.name}
+          {item?.name} · {locality?.name ?? city?.name}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <p className="flex items-baseline gap-2 text-[18px]">
-            Quoted <Price value={qc.quoted_price} size="lg" />
-          </p>
+          <h1 aria-label={`Is ₹${rupees(qc.quoted_price)} fair?`} className="flex flex-wrap items-baseline gap-x-2 text-[22px] font-bold tracking-tight">
+            Is <Price value={qc.quoted_price} size="lg" /> fair?
+          </h1>
           {v && <span className={`rounded-full px-3 py-1 text-[13px] font-semibold ${TONE[v.tone]}`}>{v.text}</span>}
         </div>
         {qc.body && <p className="text-[17px] leading-relaxed">{qc.body}</p>}
@@ -100,7 +100,7 @@ export function QuoteCheckPage({ id }: { id: string }) {
 
         {card && (
           <div>
-            <MiniCard card={card} title={card.status === 'ok' ? `Fair range when asked · ${card.scope.label}` : 'Fair range when asked'} marker={{ value: qc.quoted_price, label: 'quote' }} />
+            <MiniCard card={card} title={card.status === 'ok' ? `Fair price when asked · ${card.scope.label}` : 'Fair price when asked'} marker={{ value: qc.quoted_price, label: 'quote' }} />
             <Link href={todayUrl} className="mt-2 inline-flex items-center gap-1 text-[14px] font-semibold text-accent-ink hover:underline">
               See today’s card <ExternalLink size={14} aria-hidden />
             </Link>
@@ -141,7 +141,7 @@ export function QuoteCheckPage({ id }: { id: string }) {
                     ) : (
                       'A local'
                     )}
-                    {u && <span className="text-faint"> · rep {u.reputation.toFixed(1)}</span>}
+                    {u && u.reputation >= 2 && <span className="text-high"> · trusted local</span>}
                   </p>
                   <time className="text-[13px] text-faint" dateTime={r.created_at}>
                     {timeAgo(r.created_at)}

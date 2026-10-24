@@ -1,6 +1,7 @@
 import { Query } from 'appwrite';
 import { buildCard, stateIdOf } from '../core/card.js';
 import { getRow, listRows } from './appwrite';
+import { splitRecent } from './recentPrices';
 import { load, save } from './storage';
 import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, QuoteCheck, Reply, UserRow } from './types';
 
@@ -38,6 +39,11 @@ export async function fetchRecentLogs(p: { itemId?: string; cityId: string; loca
   if (p.localityId) q.push(Query.equal('locality_id', p.localityId));
   if (p.includeQuoted === false) q.push(Query.notEqual('price_type', 'quoted'));
   return listRows<PriceLog>('price_logs', q);
+}
+
+/** Recent paid/listed prices plus a few first quotes for one item and place. */
+export async function fetchRecentPrices(p: { itemId: string; cityId: string; localityId?: string | null }) {
+  return splitRecent(await fetchRecentLogs({ ...p, limit: 24 }));
 }
 
 export async function fetchUserLogs(userId: string, limit = 20) {

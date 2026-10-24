@@ -41,7 +41,7 @@ export function RangeBar({ p10, p25, median, p75, p90, marker, compact = false }
               {offScale === 'right' ? `${marker.label} ₹${rupees(marker.value)} →` : offScale === 'left' ? `← ${marker.label} ₹${rupees(marker.value)}` : `${marker.label} ₹${rupees(marker.value)}`}
             </span>
           ) : (
-            <span />
+            <span>half paid in the dark band</span>
           )}
           <span>₹{rupees(p90)}</span>
         </figcaption>

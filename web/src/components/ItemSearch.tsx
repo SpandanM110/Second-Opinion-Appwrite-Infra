@@ -45,7 +45,7 @@ export function ItemSearch({ cityStats, onPick }: { cityStats: Map<string, Price
           else return;
           e.preventDefault();
         }}
-        placeholder="Auto, plumber, haircut, chai…"
+        placeholder="Auto, plumber, haircut, चाय…"
         autoComplete="off"
         enterKeyHint="search"
         role="combobox"

@@ -1,0 +1,1124 @@
+{
+    "organizationId": "68b41b9600076d6301b1",
+    "projectId": "second-opinion",
+    "projectName": "Second Opinion",
+    "endpoint": "https://sgp.cloud.appwrite.io/v1",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "protocols": {
+            "rest": true,
+            "graphql": true,
+            "websocket": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": null,
+                "sessionsLimit": 10,
+                "passwordHistory": null,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "tablesDB": [
+        {
+            "$id": "main",
+            "name": "Second Opinion",
+            "enabled": true
+        }
+    ],
+    "tables": [
+        {
+            "$id": "cities",
+            "$permissions": [
+                "read(\"any\")"
+            ],
+            "databaseId": "main",
+            "name": "cities",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "state",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "country",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "lat",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "lng",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "slug",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "slug_unique",
+                    "type": "unique",
+                    "columns": [
+                        "slug"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "localities",
+            "$permissions": [
+                "read(\"any\")"
+            ],
+            "databaseId": "main",
+            "name": "localities",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "city_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "name",
+                    "type": "varchar",
+                    "size": 128,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "lat",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "lng",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "kind",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "residential",
+                        "transit_hub",
+                        "market",
+                        "tourist"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "city_id",
+                    "type": "key",
+                    "columns": [
+                        "city_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "categories",
+            "$permissions": [
+                "read(\"any\")"
+            ],
+            "databaseId": "main",
+            "name": "categories",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "name",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "unit",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "per_km",
+                        "per_visit",
+                        "per_hour",
+                        "per_plate",
+                        "each"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "hyperlocal",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": true
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "items",
+            "$permissions": [
+                "read(\"any\")"
+            ],
+            "databaseId": "main",
+            "name": "items",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "category_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "name",
+                    "type": "varchar",
+                    "size": 128,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "slug",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "aliases",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": false,
+                    "array": true,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "unit",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "per_km",
+                        "per_visit",
+                        "per_hour",
+                        "per_plate",
+                        "each"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "typical_min",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "typical_max",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "slug_unique",
+                    "type": "unique",
+                    "columns": [
+                        "slug"
+                    ],
+                    "orders": []
+                },
+                {
+                    "key": "category_id",
+                    "type": "key",
+                    "columns": [
+                        "category_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "users",
+            "$permissions": [
+                "read(\"any\")",
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "users",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "auth_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "display_name",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "home_city_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "reputation",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": 1
+                },
+                {
+                    "key": "log_count",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                },
+                {
+                    "key": "confirmations_received",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                },
+                {
+                    "key": "flags_received",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "auth_id_unique",
+                    "type": "unique",
+                    "columns": [
+                        "auth_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "price_logs",
+            "$permissions": [
+                "read(\"any\")",
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "price_logs",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "item_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "locality_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "user_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "price",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "price_type",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "paid",
+                        "quoted",
+                        "listed"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "lat",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "lng",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "proof_file_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "note",
+                    "type": "varchar",
+                    "size": 140,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "confirm_count",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                },
+                {
+                    "key": "flag_count",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                },
+                {
+                    "key": "hidden",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "created_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "item_city",
+                    "type": "key",
+                    "columns": [
+                        "item_id",
+                        "city_id"
+                    ],
+                    "orders": []
+                },
+                {
+                    "key": "item_locality",
+                    "type": "key",
+                    "columns": [
+                        "item_id",
+                        "locality_id"
+                    ],
+                    "orders": []
+                },
+                {
+                    "key": "user_id",
+                    "type": "key",
+                    "columns": [
+                        "user_id"
+                    ],
+                    "orders": []
+                },
+                {
+                    "key": "city_created",
+                    "type": "key",
+                    "columns": [
+                        "city_id",
+                        "created_at"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "DESC"
+                    ]
+                },
+                {
+                    "key": "created_at",
+                    "type": "key",
+                    "columns": [
+                        "created_at"
+                    ],
+                    "orders": [
+                        "DESC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "confirmations",
+            "$permissions": [
+                "read(\"any\")",
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "confirmations",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "log_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "user_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "created_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "log_user_unique",
+                    "type": "unique",
+                    "columns": [
+                        "log_id",
+                        "user_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "flags",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "flags",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "log_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "user_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "reason",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "typo",
+                        "wrong_unit",
+                        "tourist_price",
+                        "vendor_posting",
+                        "other"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "created_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "log_user_unique",
+                    "type": "unique",
+                    "columns": [
+                        "log_id",
+                        "user_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "price_stats",
+            "$permissions": [
+                "read(\"any\")"
+            ],
+            "databaseId": "main",
+            "name": "price_stats",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "item_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "scope_type",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "locality",
+                        "city",
+                        "state"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "scope_id",
+                    "type": "varchar",
+                    "size": 64,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "median",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "p10",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "p25",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "p75",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "p90",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "n_weighted",
+                    "type": "double",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "n_raw",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "distinct_users",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "newest_log_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "confidence",
+                    "type": "string",
+                    "format": "enum",
+                    "elements": [
+                        "high",
+                        "medium",
+                        "low"
+                    ],
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "overcharge_index",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "computed_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "item_scope_unique",
+                    "type": "unique",
+                    "columns": [
+                        "item_id",
+                        "scope_type",
+                        "scope_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "quote_checks",
+            "$permissions": [
+                "read(\"any\")",
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "quote_checks",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "user_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "item_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "locality_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "city_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "quoted_price",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "body",
+                    "type": "varchar",
+                    "size": 500,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "attached_stats_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "helpful_reply_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "reply_count",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": 0
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "created_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "city_created",
+                    "type": "key",
+                    "columns": [
+                        "city_id",
+                        "created_at"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "DESC"
+                    ]
+                },
+                {
+                    "key": "item_id",
+                    "type": "key",
+                    "columns": [
+                        "item_id"
+                    ],
+                    "orders": []
+                }
+            ]
+        },
+        {
+            "$id": "replies",
+            "$permissions": [
+                "read(\"any\")",
+                "create(\"users\")"
+            ],
+            "databaseId": "main",
+            "name": "replies",
+            "enabled": true,
+            "rowSecurity": false,
+            "columns": [
+                {
+                    "key": "quote_check_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "user_id",
+                    "type": "varchar",
+                    "size": 36,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "body",
+                    "type": "varchar",
+                    "size": 500,
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
+                },
+                {
+                    "key": "created_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "qc_created",
+                    "type": "key",
+                    "columns": [
+                        "quote_check_id",
+                        "created_at"
+                    ],
+                    "orders": []
+                }
+            ]
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "receipts",
+            "$permissions": [
+                "create(\"users\")"
+            ],
+            "fileSecurity": true,
+            "name": "receipts",
+            "enabled": true,
+            "maximumFileSize": 2097152,
+            "allowedFileExtensions": [
+                "jpg",
+                "jpeg",
+                "png",
+                "webp",
+                "heic"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ],
+    "functions": [
+        {
+            "$id": "compute-stats",
+            "name": "compute-stats",
+            "runtime": "node-22",
+            "specification": "s-0.5vcpu-512mb",
+            "events": [],
+            "schedule": "",
+            "timeout": 300,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "path": "functions/compute-stats",
+            "execute": [],
+            "interval": 60,
+            "scopes": [
+                "tables.read",
+                "rows.read",
+                "rows.write",
+                "users.read"
+            ]
+        },
+        {
+            "$id": "fair-range",
+            "name": "fair-range",
+            "runtime": "node-22",
+            "specification": "s-0.5vcpu-512mb",
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "path": "functions/fair-range",
+            "execute": [
+                "any"
+            ],
+            "scopes": [
+                "tables.read",
+                "rows.read"
+            ]
+        }
+    ]
+}

@@ -9,9 +9,10 @@
     "sync:core": "node scripts/sync-core.mjs",
     "seed": "node scripts/with-key.mjs tsx seed/seed.ts",
     "seed:dry": "tsx seed/seed.ts --dry-run",
-    "stats": "appwrite functions create-execution --function-id compute-stats --async false",
+    "stats": "node scripts/with-key.mjs node scripts/recompute.mjs",
     "deploy:functions": "npm run sync:core && appwrite push functions --all --force",
-    "deploy:web": "npm run sync:core && appwrite push sites --all --force"
+    "deploy:web": "npm run sync:core && appwrite push sites --all --force",
+    "test:e2e": "node scripts/with-key.mjs npx tsx scripts/e2e-backend.ts"
   },
   "devDependencies": {
     "node-appwrite": "^31.0.0",

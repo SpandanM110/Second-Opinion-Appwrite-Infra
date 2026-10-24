@@ -26,11 +26,11 @@
         "auth": {
             "methods": {
                 "jwt": true,
-                "phone": true,
+                "phone": false,
                 "invites": true,
-                "anonymous": true,
-                "email-otp": true,
-                "magic-url": true,
+                "anonymous": false,
+                "email-otp": false,
+                "magic-url": false,
                 "email-password": true
             },
             "security": {
@@ -337,8 +337,7 @@
         {
             "$id": "users",
             "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
+                "read(\"any\")"
             ],
             "databaseId": "main",
             "name": "users",
@@ -422,8 +421,7 @@
         {
             "$id": "price_logs",
             "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
+                "read(\"any\")"
             ],
             "databaseId": "main",
             "name": "price_logs",
@@ -602,14 +600,21 @@
                     "orders": [
                         "DESC"
                     ]
+                },
+                {
+                    "key": "proof_file",
+                    "type": "key",
+                    "columns": [
+                        "proof_file_id"
+                    ],
+                    "orders": []
                 }
             ]
         },
         {
             "$id": "confirmations",
             "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
+                "read(\"any\")"
             ],
             "databaseId": "main",
             "name": "confirmations",
@@ -672,9 +677,7 @@
         },
         {
             "$id": "flags",
-            "$permissions": [
-                "create(\"users\")"
-            ],
+            "$permissions": [],
             "databaseId": "main",
             "name": "flags",
             "enabled": true,
@@ -895,8 +898,7 @@
         {
             "$id": "quote_checks",
             "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
+                "read(\"any\")"
             ],
             "databaseId": "main",
             "name": "quote_checks",
@@ -1030,8 +1032,7 @@
         {
             "$id": "replies",
             "$permissions": [
-                "read(\"any\")",
-                "create(\"users\")"
+                "read(\"any\")"
             ],
             "databaseId": "main",
             "name": "replies",
@@ -1117,28 +1118,6 @@
     ],
     "functions": [
         {
-            "$id": "compute-stats",
-            "name": "compute-stats",
-            "runtime": "node-22",
-            "specification": "s-0.5vcpu-512mb",
-            "events": [],
-            "schedule": "",
-            "timeout": 300,
-            "enabled": true,
-            "logging": true,
-            "entrypoint": "src/main.js",
-            "commands": "npm install",
-            "path": "functions/compute-stats",
-            "execute": [],
-            "interval": 60,
-            "scopes": [
-                "tables.read",
-                "rows.read",
-                "rows.write",
-                "users.read"
-            ]
-        },
-        {
             "$id": "fair-range",
             "name": "fair-range",
             "runtime": "node-22",
@@ -1157,6 +1136,33 @@
             "scopes": [
                 "tables.read",
                 "rows.read"
+            ]
+        },
+        {
+            "$id": "worker",
+            "name": "worker",
+            "runtime": "node-22",
+            "specification": "s-0.5vcpu-512mb",
+            "events": [],
+            "schedule": "",
+            "timeout": 300,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "path": "functions/worker",
+            "execute": [
+                "users"
+            ],
+            "interval": 60,
+            "scopes": [
+                "tables.read",
+                "rows.read",
+                "rows.write",
+                "users.read",
+                "files.read",
+                "execution.read",
+                "execution.write"
             ]
         }
     ],

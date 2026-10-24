@@ -1,5 +1,5 @@
 {
-  "name": "compute-stats",
+  "name": "worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",

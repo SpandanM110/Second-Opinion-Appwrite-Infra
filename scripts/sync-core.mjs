@@ -6,7 +6,7 @@ import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
 const files = fs.readdirSync(path.join(root, 'core')).filter((f) => f.endsWith('.js') && !f.endsWith('.test.js'));
 const targets = [
-  ...['compute-stats', 'fair-range'].map((fn) => path.join(root, 'functions', fn, 'src', 'core')),
+  ...['fair-range', 'worker'].map((fn) => path.join(root, 'functions', fn, 'src', 'core')),
   path.join(root, 'web', 'src', 'core'),
 ];
 

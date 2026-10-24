@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { computeAll, weightedQuantiles, reputation, logWeight, confidenceFor } from './engine.js';
 import { buildCard } from './card.js';
 import { resolveLocation, haversineKm } from './geo.js';
+import { checkPrice, cleanName, cleanText } from './rules.js';
 
 const NOW = new Date('2026-10-24T12:00:00Z');
 const daysAgo = (d) => new Date(NOW.getTime() - d * 86_400_000).toISOString();
@@ -123,4 +124,25 @@ test('geo: snaps to locality within 3 km, else city only', () => {
   assert.equal(resolveLocation(23.30, 77.34, cities, locs).locality, null);
   assert.equal(resolveLocation(19.07, 72.87, cities, locs).city, null);
   assert.ok(Math.abs(haversineKm(23.2599, 77.4126, 22.7196, 75.8577) - 168) < 5);
+});
+
+test('price sanity bounds reject typos but accept honest quotes', () => {
+  const auto = { name: 'Auto ride', unit: 'per_km', typical_min: 5, typical_max: 72 };
+  assert.deepEqual(checkPrice(auto, 18), { ok: true });
+  assert.deepEqual(checkPrice(auto, 55), { ok: true }, 'a 3x first quote is plausible');
+  assert.equal(checkPrice(auto, 900).code, 'too_high');
+  assert.match(checkPrice(auto, 900).message, /per km/);
+  assert.equal(checkPrice(auto, 2).code, 'too_low');
+  assert.equal(checkPrice(auto, 12.5).code, 'bad_price');
+  assert.equal(checkPrice(auto, 0).code, 'bad_price');
+  assert.equal(checkPrice(auto, NaN).code, 'bad_price');
+});
+
+test('text cleaning: control characters, whitespace, lengths and display names', () => {
+  assert.equal(cleanText('  a\u0000b\n\n c  ', 10), 'a b c');
+  assert.equal(cleanText('x'.repeat(500), 140).length, 140);
+  assert.equal(cleanName('Arjun K.'), 'Arjun K.');
+  assert.equal(cleanName('<script>alert(1)</script>'), 'scriptalert1script');
+  assert.equal(cleanName('  Priya   Sharma  '), 'Priya Sharma');
+  assert.equal(cleanName('राहुल शर्मा'), 'राहुल शर्मा');
 });

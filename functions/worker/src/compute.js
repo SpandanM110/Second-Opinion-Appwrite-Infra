@@ -8,7 +8,7 @@ const WRITE_CONCURRENCY = 10;
 
 // The only writer of price_stats, reputation fields and log counters.
 // Idempotent: every run recomputes from the raw rows, so re-runs are always safe.
-export default async ({ req, res, log, error }) => {
+export const runCompute = async ({ req, res, log, error }) => {
   const t0 = Date.now();
   const db = new TablesDB(
     new Client()

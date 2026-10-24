@@ -209,11 +209,11 @@ async function writeAll() {
 
   // 4. Stats, via the real Function (also proves its scheduled path works end to end).
   step('running compute-stats …');
-  const exec = await functions.createExecution({ functionId: 'compute-stats', async: true, method: ExecutionMethod.POST });
+  const exec = await functions.createExecution({ functionId: 'worker', async: true, method: ExecutionMethod.POST });
   let done = exec;
   while (done.status === 'waiting' || done.status === 'processing') {
     await new Promise((r) => setTimeout(r, 1500));
-    done = await functions.getExecution({ functionId: 'compute-stats', executionId: exec.$id });
+    done = await functions.getExecution({ functionId: 'worker', executionId: exec.$id });
   }
   if (done.status !== 'completed') throw new Error(`compute-stats ${done.status}: ${done.errors || done.responseBody}`);
   step(`compute-stats ${done.status} in ${done.duration.toFixed(1)}s → ${done.responseBody}`);

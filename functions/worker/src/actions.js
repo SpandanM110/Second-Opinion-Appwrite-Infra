@@ -130,6 +130,17 @@ async function enforceDailyLimit(ctx, uid) {
   return LIMITS.pricesPerDay - total - 1;
 }
 
+/**
+ * Stops one account flooding a table: true when the caller already made `cap` rows in the last 24 hours.
+ * Reads the caller's newest `cap` rows and checks whether the oldest of them is still inside the window.
+ */
+async function overDailyCap(ctx, tableId, uid, cap) {
+  const { rows } = await ctx.db.listRows({ databaseId: DB, tableId, queries: [Query.equal('user_id', uid), Query.orderDesc('$createdAt'), Query.limit(cap)] });
+  return rows.length >= cap && Date.now() - new Date(rows[cap - 1].$createdAt).getTime() < DAY_MS;
+}
+
+const tooMany = (what, cap) => new HttpError(429, 'daily_limit', `That's the daily limit of ${cap} ${what}. Come back tomorrow.`);
+
 const coord = (value, lo, hi) => {
   const n = Number(value);
   return Number.isFinite(n) && n >= lo && n <= hi ? Math.round(n * 1e5) / 1e5 : null;
@@ -240,6 +251,7 @@ async function confirm(ctx, uid, p) {
   const target = await getOr404(ctx, 'price_logs', p.log_id, 'price');
   if (target.user_id === uid) throw new HttpError(403, 'own_price', 'You can’t confirm your own price.');
   if (target.hidden) throw new HttpError(409, 'hidden', 'That price is under review.');
+  if (await overDailyCap(ctx, 'confirmations', uid, LIMITS.confirmsPerDay)) throw tooMany('confirmations', LIMITS.confirmsPerDay);
   try {
     await ctx.db.createRow({
       databaseId: DB,
@@ -262,6 +274,7 @@ async function flag(ctx, uid, p) {
   if (!FLAG_REASONS.includes(reason)) throw bad('bad_reason', 'Pick a reason for the flag.');
   const target = await getOr404(ctx, 'price_logs', p.log_id, 'price');
   if (target.user_id === uid) throw new HttpError(403, 'own_price', 'You can’t flag your own price.');
+  if (await overDailyCap(ctx, 'flags', uid, LIMITS.flagsPerDay)) throw tooMany('flags', LIMITS.flagsPerDay);
   try {
     await ctx.db.createRow({
       databaseId: DB,
@@ -353,6 +366,7 @@ async function reply(ctx, uid, p) {
   const qc = await getOr404(ctx, 'quote_checks', p.quote_check_id, 'question');
   const body = cleanText(p.body, LIMITS.replyMax);
   if (body.length < 2) throw bad('empty_reply', 'Write a short answer first.');
+  if (await overDailyCap(ctx, 'replies', uid, LIMITS.repliesPerDay)) throw tooMany('answers', LIMITS.repliesPerDay);
   const row = await ctx.db.createRow({
     databaseId: DB,
     tableId: 'replies',

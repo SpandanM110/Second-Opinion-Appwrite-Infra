@@ -144,6 +144,18 @@ try {
   }
   if (!limited) check('the 21st price in a day is refused', false, 'never limited');
 
+  // --- answers are capped too
+  let replyLimited: any = null;
+  for (let i = 0; i < 41; i++) {
+    const r = await D.call({ action: 'reply', quote_check_id: ask.id, body: `answer number ${i + 1}` });
+    if (!r.ok) {
+      replyLimited = r;
+      check('the 41st answer in a day is refused', i === 40 && r.status === 429 && r.error?.code === 'daily_limit', `stopped at #${i + 1}`);
+      break;
+    }
+  }
+  if (!replyLimited) check('the 41st answer in a day is refused', false, 'never limited');
+
   // --- the stats pick it up -----------------------------------------------------------------------------
   let after: any = before;
   for (let i = 0; i < 12; i++) {

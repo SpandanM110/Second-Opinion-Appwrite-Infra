@@ -80,16 +80,16 @@ export function Reputation({ user }: { user: UserRow }) {
     <div className="mt-5">
       <div className="flex items-baseline justify-between">
         <p className="text-[14px] font-semibold">
-          Reputation <span className="num">{user.reputation.toFixed(1)}</span>
+          Standing <span className="num">{user.reputation.toFixed(1)}</span>
           <span className="font-normal text-muted"> · {label}</span>
         </p>
         <p className="text-[12px] text-faint">0.2 – 3.0</p>
       </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-line" role="meter" aria-valuemin={0.2} aria-valuemax={3} aria-valuenow={user.reputation} aria-label="Reputation">
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-line" role="meter" aria-valuemin={0.2} aria-valuemax={3} aria-valuenow={user.reputation} aria-label="Standing">
         <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(3, pct)}%` }} />
       </div>
       <p className="mt-2 text-[13px] text-muted">
-        Goes up 0.1 each time a neighbour confirms one of their prices, down 0.3 for each flag. Higher reputation moves the range more.
+        Goes up 0.1 each time a neighbour confirms one of their prices, down 0.3 for each flag. Higher standing moves the range more.
         {user.log_count < 10 && ' New accounts count at half weight until their 10th price.'}
       </p>
     </div>

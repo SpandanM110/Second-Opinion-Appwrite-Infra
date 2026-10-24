@@ -11,6 +11,9 @@ export const LIMITS = {
   nameMin: 2,
   nameMax: 40,
   pricesPerDay: 20,
+  repliesPerDay: 40,
+  confirmsPerDay: 100,
+  flagsPerDay: 40,
   flagsToHide: 3,
 };
 

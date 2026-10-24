@@ -16,6 +16,8 @@ const PAGES = [
   ['profile', '/u/seed-u01'],
   ['me (signed out)', '/me'],
   ['api', '/api'],
+  ['reset password', '/reset?userId=nobody&secret=expired'],
+  ['reset (bad link)', '/reset'],
   ['404', '/nope'],
 ];
 
@@ -39,6 +41,7 @@ for (const width of [375, 1280]) {
   const page = await browser.newPage();
   await page.setViewport({ width, height: width < 700 ? 812 : 900, isMobile: width < 700, hasTouch: width < 700 });
   for (const [name, url] of PAGES) {
+    await page.bringToFront();
     await page.goto(base + url, { waitUntil: 'networkidle0', timeout: 45000 });
     await new Promise((r) => setTimeout(r, 600));
     await audit(page, `${name} @${width}`);

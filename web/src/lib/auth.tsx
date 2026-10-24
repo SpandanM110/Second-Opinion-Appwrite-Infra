@@ -21,6 +21,8 @@ interface AuthApi {
   /** Resolves true once the visitor is signed in (immediately if they already are); false if they dismiss the sheet. */
   require: (reason?: AuthReason) => Promise<boolean>;
   signOut: () => Promise<void>;
+  /** Emails a password-reset link. */
+  recover: (email: string) => Promise<void>;
   updateProfile: (p: { display_name?: string; home_city_id?: string }) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -153,6 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession, loadProfile, toast, close],
   );
 
+  const recover = useCallback(async (email: string) => {
+    await account.createRecovery({ email, url: `${window.location.origin}/reset` });
+  }, []);
+
   const signOut = useCallback(async () => {
     await account.deleteSession({ sessionId: 'current' }).catch(() => {});
     setSignedIn(null, null);
@@ -172,12 +178,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refreshProfile],
   );
 
-  const api = useMemo<AuthApi>(() => ({ status, user, profile, require, signOut, updateProfile, refreshProfile }), [status, user, profile, require, signOut, updateProfile, refreshProfile]);
+  const api = useMemo<AuthApi>(() => ({ status, user, profile, require, signOut, recover, updateProfile, refreshProfile }), [status, user, profile, require, signOut, recover, updateProfile, refreshProfile]);
 
   return (
     <Ctx.Provider value={api}>
       {children}
-      <AuthSheet open={sheet.open} reason={sheet.reason} onClose={() => close(false)} onSignUp={signUp} onSignIn={signIn} />
+      <AuthSheet open={sheet.open} reason={sheet.reason} onClose={() => close(false)} onSignUp={signUp} onSignIn={signIn} onRecover={recover} />
     </Ctx.Provider>
   );
 }

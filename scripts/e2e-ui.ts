@@ -24,12 +24,14 @@ let failed = 0;
 const errors: string[] = [];
 
 const browser = await launchEdge();
-const page: Page = await browser.newPage();
+// the tab Edge opened with is the foreground one; a tab opened later can start in the background, where animation frames pause
+const page: Page = (await browser.pages())[0] ?? (await browser.newPage());
+await page.bringToFront();
 await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
 page.setDefaultTimeout(20000);
 page.setDefaultNavigationTimeout(30000);
 page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
-page.on('console', (m) => m.type() === 'error' && !/status of 401|ERR_INTERNET_DISCONNECTED/.test(m.text()) && errors.push(m.text().slice(0, 200)));
+page.on('console', (m) => m.type() === 'error' && !/status of (401|404)|ERR_INTERNET_DISCONNECTED/.test(m.text()) && errors.push(m.text().slice(0, 200)));
 
 async function vitals(label: string) {
   if (!process.env.E2E_VITALS) return;
@@ -53,8 +55,8 @@ async function step(name: string, fn: () => Promise<string | void>) {
   }
 }
 const text = () => page.evaluate(() => document.body.innerText);
-const waitText = (t: string, timeout = 15000) => page.waitForFunction((t) => document.body.innerText.includes(t), { timeout }, t);
-const waitGone = (t: string, timeout = 15000) => page.waitForFunction((t) => !document.body.innerText.includes(t), { timeout }, t);
+const waitText = (t: string, timeout = 15000) => page.waitForFunction((t) => document.body.innerText.includes(t), { timeout, polling: 100 }, t);
+const waitGone = (t: string, timeout = 15000) => page.waitForFunction((t) => !document.body.innerText.includes(t), { timeout, polling: 100 }, t);
 async function clickText(sel: string, t: string, within = 'body') {
   const ok = await page.evaluate(
     (sel, t, within) => {
@@ -131,7 +133,7 @@ try {
     const draft = await page.evaluate(() => localStorage.getItem('so.draft.log.v1'));
     if (draft && draft !== 'null') throw new Error('draft not cleared: ' + draft);
     await clickText('button', 'Done', dialog);
-    await page.waitForFunction(() => !document.querySelector('dialog[open]'));
+    await page.waitForFunction(() => !document.querySelector('dialog[open]'), { polling: 100 });
   });
 
   await step('my price shows on the card page under my name, with the receipt tag', async () => {
@@ -143,7 +145,7 @@ try {
   await step('confirm a neighbour’s price (one tap), and only once', async () => {
     await clickText('button', 'I paid about this too', 'main');
     await waitText('Thanks, you confirmed this price');
-    await page.waitForFunction(() => [...document.querySelectorAll('button')].some((b) => /You paid about this too/.test(b.textContent ?? '')));
+    await page.waitForFunction(() => [...document.querySelectorAll('button')].some((b) => /You paid about this too/.test(b.textContent ?? '')), { polling: 100 });
   });
 
   await step('flag a price with a reason', async () => {
@@ -174,7 +176,7 @@ try {
     await waitText('is 2.');
     await typeInto(`${dialog} textarea`, 'Quoted at the gate. Fair?');
     await clickText('button', 'Ask locals', `${dialog} form`);
-    await page.waitForFunction(() => location.pathname.startsWith('/q/'), { timeout: 25000 });
+    await page.waitForFunction(() => location.pathname.startsWith('/q/'), { timeout: 25000, polling: 100 });
     await page.waitForFunction(() => /^Is ₹ ?300 fair\?/.test((document.querySelector('h1')?.innerText ?? '').replace(/\s+/g, ' ')), { timeout: 15000 });
   });
 
@@ -216,6 +218,14 @@ try {
     await page.waitForSelector(dialog);
     await clickText('button', 'Sign in', `${dialog} form`);
     await waitText('Welcome back');
+    // forgot password: asks for the email, then says the same thing either way
+    await clickText('button', 'Forgot password?', dialog);
+    await waitText('Reset your password');
+    await typeInto(`${dialog} input[type=email]`, EMAIL);
+    await clickText('button', 'Send reset link', dialog);
+    await waitText('Check your email');
+    await clickText('button', 'Back to sign in', dialog);
+    await waitText('Welcome back');
     await typeInto(`${dialog} input[type=email]`, EMAIL);
     await typeInto(`${dialog} input[autocomplete=current-password]`, 'wrong-password-1');
     await clickText('button', 'Sign in', `${dialog} form`);
@@ -223,6 +233,20 @@ try {
     await typeInto(`${dialog} input[autocomplete=current-password]`, PASSWORD);
     await clickText('button', 'Sign in', `${dialog} form`);
     await waitText(NAME2);
+  });
+
+  await step('the reset page: incomplete link, mismatched passwords and an expired link are all explained', async () => {
+    await page.goto(`${base}/reset`, { waitUntil: 'networkidle0' });
+    await waitText('That link isn’t complete');
+    await page.goto(`${base}/reset?userId=nobody&secret=expired`, { waitUntil: 'networkidle0' });
+    await typeInto('input[autocomplete=new-password]', 'a-new-password-1');
+    await page.type('label:nth-of-type(2) input', 'something-else-1');
+    await clickText('button', 'Save new password', 'main');
+    await waitText('don’t match');
+    await page.click('label:nth-of-type(2) input', { clickCount: 3 });
+    await page.type('label:nth-of-type(2) input', 'a-new-password-1');
+    await clickText('button', 'Save new password', 'main');
+    await waitText('expired or was already used');
   });
 
   await step('offline: a price is kept on the phone and sent when the connection returns', async () => {

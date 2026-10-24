@@ -7,12 +7,15 @@ import { Channel, Query } from 'appwrite';
 import { MiniCard } from '../components/FairRangeCard';
 import { Price } from '../components/Price';
 import { parseCard } from '../components/QuoteCheckItem';
-import { SignInSheet } from '../components/SignInSheet';
 import { ErrorState, ListSkeleton } from '../components/States';
+import { callWorker } from '../lib/api';
 import { client, DB } from '../lib/appwrite';
+import { useAuth } from '../lib/auth';
+import { friendlyAuthError } from '../lib/authErrors';
 import { rupees, timeAgo, verdict } from '../lib/format';
 import { fetchQuoteCheck, fetchReplies, fetchUsers } from '../lib/queries';
 import { useRefData } from '../lib/ref';
+import { useToast } from '../lib/toast';
 import type { Reply, UserRow } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
 
@@ -20,7 +23,11 @@ const TONE = { warn: 'bg-warn-soft text-warn', medium: 'bg-medium-soft text-medi
 
 export function QuoteCheckPage({ id }: { id: string }) {
   const ref = useRefData();
-  const [signIn, setSignIn] = useState(false);
+  const auth = useAuth();
+  const toast = useToast();
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [helpfulId, setHelpfulId] = useState<string | null>(null);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [users, setUsers] = useState<Map<string, UserRow>>(new Map());
   const [live, setLive] = useState(false);
@@ -67,6 +74,30 @@ export function QuoteCheckPage({ id }: { id: string }) {
   const asker = users.get(qc.user_id);
   const card = parseCard(qc.attached_card);
   const v = card?.status === 'ok' ? verdict(qc.quoted_price, card.range) : null;
+  const send = async () => {
+    if (!(await auth.require('reply'))) return;
+    setSending(true);
+    try {
+      await callWorker({ action: 'reply', quote_check_id: id, body: draft });
+      setDraft('');
+      toast('Answer posted.');
+    } catch (e) {
+      toast(friendlyAuthError(e), 'error');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const markHelpful = async (replyId: string) => {
+    try {
+      await callWorker({ action: 'helpful', quote_check_id: id, reply_id: replyId });
+      setHelpfulId(replyId);
+      toast('Marked as helpful.');
+    } catch (e) {
+      toast(friendlyAuthError(e), 'error');
+    }
+  };
+
   const todayUrl = `/item/${qc.item_id}?c=${qc.city_id}${qc.locality_id ? `&l=${qc.locality_id}` : ''}`;
 
   return (
@@ -126,7 +157,7 @@ export function QuoteCheckPage({ id }: { id: string }) {
         <ul className="space-y-2" aria-live="polite">
           {replies.map((r) => {
             const u = users.get(r.user_id);
-            const helpful = qc.helpful_reply_id === r.$id;
+            const helpful = (helpfulId ?? qc.helpful_reply_id) === r.$id;
             return (
               <li key={r.$id} className={`panel p-4 ${helpful ? 'border-high/40 ring-1 ring-high/30' : ''}`}>
                 <div className="flex items-center gap-2">
@@ -148,6 +179,11 @@ export function QuoteCheckPage({ id }: { id: string }) {
                   </time>
                 </div>
                 <p className="mt-2 text-[15px] leading-relaxed">{r.body}</p>
+                {!helpful && auth.user?.$id === qc.user_id && (
+                  <button type="button" onClick={() => markHelpful(r.$id)} className="tap -ml-2 mt-1 inline-flex items-center gap-1.5 rounded-lg px-2 text-[13px] font-semibold text-accent-ink hover:bg-accent-soft">
+                    <CheckCircle2 size={15} aria-hidden /> This helped
+                  </button>
+                )}
                 {helpful && (
                   <p className="mt-2 inline-flex items-center gap-1 text-[13px] font-semibold text-high">
                     <CheckCircle2 size={15} aria-hidden /> Marked helpful by {asker?.display_name ?? 'the asker'}
@@ -157,12 +193,33 @@ export function QuoteCheckPage({ id }: { id: string }) {
             );
           })}
         </ul>
-        <button type="button" onClick={() => setSignIn(true)} className="btn-secondary w-full justify-start text-faint">
-          Write a reply…
-        </button>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send();
+          }}
+          className="panel space-y-2 p-3"
+        >
+          <label htmlFor="reply" className="text-[13px] font-semibold text-muted">
+            Your answer
+          </label>
+          <textarea
+            id="reply"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value.slice(0, 500))}
+            rows={3}
+            placeholder="What did you pay for this? Anything that helps…"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-[16px] outline-none focus:border-accent focus:ring-4 focus:ring-accent/10"
+          />
+          <div className="flex items-center justify-between gap-3">
+            <span className="num text-[12px] text-faint">{draft.length}/500</span>
+            <button type="submit" className="btn-primary h-11" disabled={sending || draft.trim().length < 2}>
+              {auth.status === 'in' ? (sending ? 'Posting…' : 'Post answer') : 'Sign in to answer'}
+            </button>
+          </div>
+        </form>
       </section>
 
-      <SignInSheet open={signIn} onClose={() => setSignIn(false)} />
     </div>
   );
 }

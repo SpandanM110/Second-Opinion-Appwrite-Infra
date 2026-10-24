@@ -6,22 +6,21 @@ export type AsyncState<T> = { status: 'loading'; data?: T } | { status: 'ok'; da
 
 /**
  * Runs `fn` whenever `deps` change; keeps the previous data visible while reloading.
- * `initial` is server-rendered data for the first `deps`: it is shown immediately and not refetched.
+ * `initial` is server-rendered data for the first `deps`: it is shown immediately, then quietly revalidated once
+ * (no loading state), so a price you just saved never hides behind a cache.
  */
 export function useAsync<T>(fn: () => Promise<T>, deps: unknown[], initial?: T): AsyncState<T> & { reload: () => void } {
   const [state, setState] = useState<AsyncState<T>>(initial !== undefined ? { status: 'ok', data: initial } : { status: 'loading' });
   const [tick, setTick] = useState(0);
   const skipFirst = useRef(initial !== undefined);
   useEffect(() => {
-    if (skipFirst.current) {
-      skipFirst.current = false;
-      return;
-    }
     let alive = true;
-    setState((s) => ({ status: 'loading', data: s.data }));
+    const quiet = skipFirst.current;
+    skipFirst.current = false;
+    if (!quiet) setState((s) => ({ status: 'loading', data: s.data }));
     fn().then(
       (data) => alive && setState({ status: 'ok', data }),
-      (error: Error) => alive && setState((s) => ({ status: 'error', error, data: s.data })),
+      (error: Error) => alive && !quiet && setState((s) => ({ status: 'error', error, data: s.data })),
     );
     return () => {
       alive = false;

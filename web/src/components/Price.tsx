@@ -11,9 +11,9 @@ const SIZES = {
 export function Price({ value, size = 'md', className = '' }: { value: number; size?: keyof typeof SIZES; className?: string }) {
   const s = SIZES[size];
   return (
-    <span className={`num inline-flex items-baseline ${className}`} aria-label={`₹${rupees(value)}`}>
-      <span className={s.sym} aria-hidden>₹</span>
-      <span className={s.num} aria-hidden>{rupees(value)}</span>
+    <span className={`num inline-flex items-baseline ${className}`}>
+      <span className={s.sym}>₹</span>
+      <span className={s.num}>{rupees(value)}</span>
     </span>
   );
 }

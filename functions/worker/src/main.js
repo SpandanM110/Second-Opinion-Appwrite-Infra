@@ -10,7 +10,7 @@ import { runCompute } from './compute.js';
 //               can be trusted as the caller's identity.
 export default async (context) => {
   const { req, res } = context;
-  const body = req.bodyJson ?? safeJson(req.bodyText);
+  const body = safeJson(req.bodyText);
   const action = String(body?.action ?? '');
   const signedIn = Boolean(req.headers['x-appwrite-user-id']);
 

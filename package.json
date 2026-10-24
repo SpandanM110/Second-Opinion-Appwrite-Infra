@@ -15,9 +15,11 @@
     "test:e2e": "node scripts/with-key.mjs npx tsx scripts/e2e-backend.ts"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "axe-core": "^4.14.0",
     "node-appwrite": "^31.0.0",
+    "puppeteer-core": "^24.43.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0",
-    "@types/node": "^22.0.0"
+    "typescript": "^5.6.0"
   }
 }

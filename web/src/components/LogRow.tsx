@@ -1,11 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { EyeOff, Receipt, ThumbsUp } from 'lucide-react';
+import { EyeOff, Flag, Receipt, ThumbsUp } from 'lucide-react';
 import { UNIT_LABEL } from '../core/card.js';
+import { callWorker } from '../lib/api';
+import { useAuth } from '../lib/auth';
+import { friendlyAuthError } from '../lib/authErrors';
+import { announceChange } from '../lib/events';
 import { timeAgo } from '../lib/format';
 import { useRefData } from '../lib/ref';
+import { useToast } from '../lib/toast';
 import type { PriceLog, UserRow } from '../lib/types';
+import { FlagSheet, type FlagResult } from './FlagSheet';
 import { Price } from './Price';
 
 const TYPE_STYLE = {
@@ -14,15 +21,52 @@ const TYPE_STYLE = {
   listed: 'bg-scope-city-soft text-scope-city',
 } as const;
 
-/** One price. Hidden prices stay visible, greyed, with an "under review" tag. */
+/** One price, with one-tap confirm and flag. Hidden prices stay visible, greyed, with an "under review" tag and the reasons. */
 export function LogRow({ log, author, showItem = false, hideLocality = false }: { log: PriceLog; author?: UserRow; showItem?: boolean; hideLocality?: boolean }) {
   const ref = useRefData();
+  const auth = useAuth();
+  const toast = useToast();
   const item = ref.item(log.item_id);
   const locality = ref.locality(log.locality_id);
+
+  const [count, setCount] = useState(log.confirm_count);
+  const [confirmed, setConfirmed] = useState(false);
+  const [flags, setFlags] = useState(log.flag_count);
+  const [hidden, setHidden] = useState(log.hidden);
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const own = auth.user?.$id === log.user_id;
+  const canAct = !own && !hidden;
+
+  const confirm = async () => {
+    if (!(await auth.require('confirm'))) return;
+    setBusy(true);
+    try {
+      const r = await callWorker<{ confirm_count: number }>({ action: 'confirm', log_id: log.$id });
+      setCount(r.confirm_count);
+      setConfirmed(true);
+      toast('Thanks, you confirmed this price.');
+      setTimeout(announceChange, 7000);
+    } catch (e) {
+      const msg = friendlyAuthError(e);
+      if (/already/i.test(msg)) setConfirmed(true);
+      toast(msg, /already/i.test(msg) ? 'info' : 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const flagged = (r: FlagResult) => {
+    setFlags(r.flag_count);
+    setHidden(r.hidden);
+    toast(r.hidden ? 'Flagged. That price is now hidden from the range.' : `Flagged. ${r.flag_count} of 3 flags needed to hide it.`);
+    setTimeout(announceChange, 7000);
+  };
+
   return (
-    <li className={`flex items-start gap-3 py-3 ${log.hidden ? 'opacity-55' : ''}`}>
+    <li className={`flex items-start gap-3 py-3 ${hidden ? 'opacity-60' : ''}`}>
       <div className="min-w-[68px] shrink-0 pt-0.5">
-        <Price value={log.price} size="md" className={log.hidden ? 'line-through' : ''} />
+        <Price value={log.price} size="md" className={hidden ? 'line-through' : ''} />
         {showItem && item && <span className="block text-[12px] text-faint">{UNIT_LABEL[item.unit]}</span>}
       </div>
       <div className="min-w-0 flex-1">
@@ -48,9 +92,9 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
               {author.display_name}
             </Link>
           )}
-          {log.confirm_count > 0 && (
+          {count > 0 && (
             <span className="inline-flex items-center gap-1">
-              <ThumbsUp size={13} aria-hidden /> {log.confirm_count} paid about this too
+              <ThumbsUp size={13} aria-hidden /> {count} paid about this too
             </span>
           )}
           {log.proof_file_id && (
@@ -58,13 +102,31 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
               <Receipt size={13} aria-hidden /> receipt
             </span>
           )}
-          {log.hidden && (
+          {hidden && (
             <span className="inline-flex items-center gap-1 font-semibold text-warn">
-              <EyeOff size={13} aria-hidden /> under review ({log.flag_count} {log.flag_count === 1 ? 'flag' : 'flags'})
+              <EyeOff size={13} aria-hidden /> under review{log.flag_reasons ? `: ${log.flag_reasons}` : ''} ({flags} {flags === 1 ? 'flag' : 'flags'})
             </span>
           )}
         </p>
+        {hidden && own && <p className="mt-1 text-[13px] text-muted">Made a mistake? Share the price again, correctly.</p>}
+        {canAct && (
+          <div className="-ml-2 mt-0.5 flex flex-wrap items-center">
+            <button
+              type="button"
+              onClick={confirm}
+              disabled={busy || confirmed}
+              aria-pressed={confirmed}
+              className={`tap inline-flex items-center gap-1.5 rounded-lg px-2 text-[13px] font-semibold ${confirmed ? 'text-high' : 'text-accent-ink hover:bg-accent-soft'} disabled:cursor-default`}
+            >
+              <ThumbsUp size={15} aria-hidden /> {confirmed ? 'You paid about this too' : 'I paid about this too'}
+            </button>
+            <button type="button" onClick={() => setFlagOpen(true)} className="tap inline-flex items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-muted hover:bg-canvas">
+              <Flag size={15} aria-hidden /> Flag
+            </button>
+          </div>
+        )}
       </div>
+      {flagOpen && <FlagSheet logId={log.$id} price={log.price} itemName={item?.name} onClose={() => setFlagOpen(false)} onDone={flagged} />}
     </li>
   );
 }
@@ -73,7 +135,7 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
 export function PriceTypeHelp() {
   return (
     <p className="text-[12px] leading-relaxed text-faint">
-      <b className="font-semibold text-high">paid</b> = what they handed over · <b className="font-semibold text-warn">quoted</b> = what they were asked first ·{" "}
+      <b className="font-semibold text-high">paid</b> = what they handed over · <b className="font-semibold text-warn">quoted</b> = what they were asked first ·{' '}
       <b className="font-semibold text-scope-city">listed</b> = on a board or menu
     </p>
   );

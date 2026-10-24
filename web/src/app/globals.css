@@ -7,7 +7,7 @@
 
   --color-ink: #111827;
   --color-muted: #4b5563;  /* 7.6:1 on white */
-  --color-faint: #6b7280;  /* 4.8:1 on white */
+  --color-faint: #5b6270;  /* 5.9:1 on the page background, 6.5:1 on white */
   --color-line: #e5e7eb;
   --color-canvas: #f5f6f8;
   --color-surface: #ffffff;

@@ -73,7 +73,7 @@ export function ProfilePage({ id }: { id: string }) {
   );
 }
 
-function Reputation({ user }: { user: UserRow }) {
+export function Reputation({ user }: { user: UserRow }) {
   const pct = ((user.reputation - 0.2) / (3 - 0.2)) * 100;
   const label = user.reputation >= 2 ? 'Trusted local' : user.reputation >= 1 ? 'Good standing' : 'Under review';
   return (

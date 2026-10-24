@@ -8,7 +8,7 @@ import { ScopeChip } from '../ScopeChip';
 
 function Pin({ n }: { n: number }) {
   return (
-    <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white" aria-label={`Note ${n}`}>
+    <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white" role="img" aria-label={`Note ${n}`}>
       {n}
     </span>
   );

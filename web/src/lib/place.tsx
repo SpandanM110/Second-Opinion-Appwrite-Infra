@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useRouter } from 'next/navigation';
 import { resolveLocation } from '../core/geo.js';
 import { useRefData } from './ref';
+import { load, save } from './storage';
 import type { City, Locality } from './types';
 
 // Where the user is checking prices for. GPS fills it in; the manual picker always wins and is
@@ -19,9 +20,12 @@ interface PlaceApi {
   status: LocateStatus;
   setPlace: (cityId: string, localityId: string | null) => void;
   locate: () => void;
+  /** Last GPS fix from the last 30 minutes, if any. Stored on prices you share so areas can be redrawn later. */
+  coords: { lat: number; lng: number } | null;
 }
 
 const COOKIE = 'so_place';
+const COORDS_KEY = 'so.coords.v1';
 const SOURCE_KEY = 'so.place.source';
 export const DEFAULT_PLACE: StoredPlace = { cityId: 'bhopal', localityId: null, source: 'default' };
 const Ctx = createContext<PlaceApi | null>(null);
@@ -40,9 +44,12 @@ export function PlaceProvider({ initial, children }: { initial: StoredPlace; chi
   const router = useRouter();
   const [place, setPlaceState] = useState<StoredPlace>(initial);
   const [status, setStatus] = useState<LocateStatus>('idle');
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   // Whether the place came from GPS or a manual pick isn't in the cookie; restore it after hydration.
   useEffect(() => {
+    const c = load<{ lat: number; lng: number; at: number } | null>(COORDS_KEY, null);
+    if (c && Date.now() - c.at < 30 * 60_000) setCoords({ lat: c.lat, lng: c.lng });
     try {
       const source = localStorage.getItem(SOURCE_KEY) as StoredPlace['source'] | null;
       if (source && source !== place.source) setPlaceState((p) => ({ ...p, source }));
@@ -73,6 +80,8 @@ export function PlaceProvider({ initial, children }: { initial: StoredPlace; chi
           locality: Locality | null;
         };
         if (!city) return setStatus('outside');
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        save(COORDS_KEY, { lat: pos.coords.latitude, lng: pos.coords.longitude, at: Date.now() });
         commit({ cityId: city.$id, localityId: locality?.$id ?? null, source: 'gps' });
         setStatus('ok');
       },
@@ -99,8 +108,9 @@ export function PlaceProvider({ initial, children }: { initial: StoredPlace; chi
       status,
       setPlace,
       locate,
+      coords,
     }),
-    [ref, place, status, setPlace, locate],
+    [ref, place, status, setPlace, locate, coords],
   );
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }

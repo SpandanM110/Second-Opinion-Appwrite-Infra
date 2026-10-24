@@ -56,13 +56,13 @@ export async function getCard(ref: RefData, itemId: string, cityId: string, loca
   const locality = localityId ? (ref.localities.find((l) => l.$id === localityId && l.city_id === city.$id) ?? null) : null;
   const category = ref.categories.find((c) => c.$id === item.category_id);
   const scopeIds = [city.$id, stateIdOf(city), ...(locality ? [locality.$id] : [])];
-  const rows = await rest<PriceStat>('price_stats', [Query.equal('item_id', item.$id), Query.equal('scope_id', scopeIds), Query.limit(10)], 60);
+  const rows = await rest<PriceStat>('price_stats', [Query.equal('item_id', item.$id), Query.equal('scope_id', scopeIds), Query.limit(10)], 30);
   const card = buildCard({ item, hyperlocal: category?.hyperlocal ?? true, city, locality, rows }) as Card;
   return { card, item, city, locality, fetchedAt: new Date().toISOString() };
 }
 
 export async function getCityStats(cityIds: string[]) {
-  return rest<PriceStat>('price_stats', [Query.equal('scope_type', 'city'), Query.equal('scope_id', cityIds), Query.limit(200)], 60);
+  return rest<PriceStat>('price_stats', [Query.equal('scope_type', 'city'), Query.equal('scope_id', cityIds), Query.limit(200)], 30);
 }
 
 export const GUIDE_COOKIE = 'so_guide';
@@ -74,8 +74,8 @@ export async function getGuideDismissed() {
 export async function getRecentLogs(itemId: string, cityId: string, localityId: string | null) {
   const q = [Query.equal('city_id', cityId), Query.equal('item_id', itemId), Query.orderDesc('created_at'), Query.limit(24)];
   if (localityId) q.push(Query.equal('locality_id', localityId));
-  const logs = splitRecent(await rest<PriceLog>('price_logs', q, 30));
+  const logs = splitRecent(await rest<PriceLog>('price_logs', q, 5));
   const ids = [...new Set(logs.map((l) => l.user_id))];
-  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 300) : [];
+  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 60) : [];
   return { logs, users };
 }

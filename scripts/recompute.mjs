@@ -6,10 +6,11 @@ import { Client, Functions, TablesDB, Query, ExecutionMethod } from 'node-appwri
 const client = new Client().setEndpoint(process.env.APPWRITE_ENDPOINT).setProject(process.env.APPWRITE_PROJECT_ID).setKey(process.env.APPWRITE_API_KEY);
 const ex = await new Functions(client).createExecution({
   functionId: 'worker',
-  body: JSON.stringify({ action: 'compute' }),
+  // --empty sends what the hourly schedule sends: no body at all
+  body: process.argv.includes('--empty') ? '' : JSON.stringify({ action: 'compute' }),
   async: false,
   method: ExecutionMethod.POST,
-  headers: { 'content-type': 'application/json' },
+  headers: process.argv.includes('--empty') ? {} : { 'content-type': 'application/json' },
 });
 console.log(ex.status, ex.responseStatusCode, ex.responseBody);
 

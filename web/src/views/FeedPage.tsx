@@ -4,6 +4,7 @@ import { useQueryState } from '../lib/nav';
 import { LogRow, PriceTypeHelp } from '../components/LogRow';
 import { QuoteCheckItem } from '../components/QuoteCheckItem';
 import { Empty, ErrorState, ListSkeleton } from '../components/States';
+import { useOnChange } from '../lib/events';
 import { usePlace } from '../lib/place';
 import { fetchQuoteChecks, fetchRecentLogs, fetchUsers } from '../lib/queries';
 import { useRefData } from '../lib/ref';
@@ -34,6 +35,11 @@ export function FeedPage() {
     const logs = await fetchRecentLogs({ cityId, limit: 40 });
     return { logs, users: await fetchUsers(logs.map((l) => l.user_id)) };
   }, [cityId, tab]);
+
+  useOnChange(() => {
+    qcQ.reload();
+    logsQ.reload();
+  });
 
   const setParam = (k: string, v: string) => {
     const next = new URLSearchParams(params);

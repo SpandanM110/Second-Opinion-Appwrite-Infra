@@ -531,6 +531,15 @@
                     "default": 0
                 },
                 {
+                    "key": "flag_reasons",
+                    "type": "varchar",
+                    "size": 160,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
                     "key": "hidden",
                     "type": "boolean",
                     "required": false,

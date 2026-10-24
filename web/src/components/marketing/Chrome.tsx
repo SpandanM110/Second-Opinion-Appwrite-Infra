@@ -2,14 +2,14 @@ import Link from 'next/link';
 import { Logo } from '../Logo';
 
 const NAV = [
-  ['#how', 'How it works'],
-  ['#trust', 'Trust'],
-  ['#locals', 'For locals'],
-  ['#developers', 'API'],
-  ['#faq', 'FAQ'],
+  ['/about#how', 'How it works'],
+  ['/about#trust', 'Trust'],
+  ['/about#locals', 'For locals'],
+  ['/api', 'API'],
+  ['/about#faq', 'FAQ'],
 ] as const;
 
-export function MarketingHeader() {
+export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
@@ -17,11 +17,11 @@ export function MarketingHeader() {
           <Logo />
           <span className="text-[17px]">Second Opinion</span>
         </Link>
-        <nav className="ml-auto hidden items-center gap-1 lg:flex" aria-label="Page sections">
+        <nav className={`ml-auto items-center gap-1 ${minimal ? 'hidden' : 'hidden lg:flex'}`} aria-label="Page sections">
           {NAV.map(([href, label]) => (
-            <a key={href} href={href} className="tap inline-flex items-center rounded-lg px-3 text-[15px] font-medium text-muted hover:text-ink">
+            <Link key={href} href={href} className="tap inline-flex items-center rounded-lg px-3 text-[15px] font-medium text-muted hover:text-ink">
               {label}
-            </a>
+            </Link>
           ))}
         </nav>
         <Link href="/check" className="btn-primary ml-auto h-10 px-4 text-[14px] lg:ml-2">
@@ -43,9 +43,9 @@ export function MarketingFooter() {
           <p className="mt-2 max-w-xs">A verified, locality-level price layer for everything that isn’t on an app.</p>
           <p className="mt-3 max-w-xs text-[13px] text-faint">
             Demo data for the hackathon; real prices start now.{' '}
-            <a className="underline underline-offset-2" href="#data">
+            <Link className="underline underline-offset-2" href="/about#data">
               How it was made
-            </a>
+            </Link>
           </p>
         </div>
         <nav aria-label="Product">
@@ -72,9 +72,9 @@ export function MarketingFooter() {
           <p className="mb-2 font-semibold text-ink">Build</p>
           <ul className="space-y-1">
             <li>
-              <a href="#developers" className="tap inline-flex items-center hover:underline">
+              <Link href="/api" className="tap inline-flex items-center hover:underline">
                 API
-              </a>
+              </Link>
             </li>
             <li>
               <a href="https://github.com/SpandanM110/Second-Opinion-Appwrite-Infra" target="_blank" rel="noreferrer" className="tap inline-flex items-center hover:underline">

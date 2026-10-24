@@ -71,12 +71,17 @@ try {
   // --- logging a price ----------------------------------------------------------------------------------
   const before = (await db.listRows({ databaseId: 'main', tableId: 'price_stats', queries: [Query.equal('item_id', 'auto-per-km'), Query.equal('scope_id', 'bpl-mp-nagar')] })).rows[0] as any;
   const t0 = Date.now();
-  const first = await A.call({ action: 'log', ...LOG, price: 20, note: '  after   bargaining  ', user_id: 'seed-u01', created_at: '2020-01-01T00:00:00Z', confirm_count: 99, hidden: true, is_seed: true });
+  const first = await A.call({ action: 'log', ...LOG, client_ref: `ref-${stamp}`, price: 20, note: '  after   bargaining  ', user_id: 'seed-u01', created_at: '2020-01-01T00:00:00Z', confirm_count: 99, hidden: true, is_seed: true });
   check('a valid price is saved', first.ok && first.id, `${Date.now() - t0} ms, ${first.left} left today, stats ${first.refresh}`);
   const row = (await db.getRow({ databaseId: 'main', tableId: 'price_logs', rowId: first.id })) as any;
   check('the author is the caller, not what the body claimed', row.user_id === A.id, row.user_id);
   check('server sets the time, counters and flags (forged fields ignored)', row.created_at > '2026' && row.confirm_count === 0 && row.hidden === false && row.is_seed === false, `${row.created_at} c=${row.confirm_count} h=${row.hidden}`);
   check('note is cleaned', row.note === 'after bargaining', JSON.stringify(row.note));
+
+  const again = await A.call({ action: 'log', ...LOG, client_ref: `ref-${stamp}`, price: 20 });
+  check('sending the same submission again is a no-op, not a duplicate', again.ok && again.duplicate === true && again.id === first.id, JSON.stringify(again).slice(0, 90));
+  const mine = await db.listRows({ databaseId: 'main', tableId: 'price_logs', queries: [Query.equal('user_id', A.id), Query.limit(50)] });
+  check('exactly one row exists for it', mine.rows.filter((r: any) => r.price === 20).length === 1);
 
   const typo = await A.call({ action: 'log', ...LOG, price: 900 });
   check('an absurd price is rejected with advice', typo.status === 400 && typo.error?.code === 'too_high' && /per km/.test(typo.error.message), typo.error?.message?.slice(0, 80));

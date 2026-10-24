@@ -27,7 +27,7 @@ export interface PriceStat extends Base {
 export interface PriceLog extends Base {
   item_id: string; locality_id: string | null; city_id: string; user_id: string; price: number; price_type: PriceType;
   lat: number | null; lng: number | null; proof_file_id: string | null; note: string | null;
-  confirm_count: number; flag_count: number; hidden: boolean; is_seed: boolean; created_at: string;
+  confirm_count: number; flag_count: number; flag_reasons: string | null; hidden: boolean; is_seed: boolean; created_at: string;
 }
 
 export interface UserRow extends Base {

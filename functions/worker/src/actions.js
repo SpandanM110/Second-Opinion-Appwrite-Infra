@@ -13,6 +13,7 @@ import { checkPrice, cleanName, cleanText, FLAG_REASONS, LIMITS, PRICE_TYPES } f
 const DB = 'main';
 const RECEIPTS = 'receipts';
 const DAY_MS = 86_400_000;
+const FLAG_REASON_WORDS = { typo: 'typo', wrong_unit: 'wrong unit', tourist_price: 'tourist price', vendor_posting: 'posted by the seller', other: 'other' };
 
 class HttpError extends Error {
   constructor(status, code, message) {
@@ -30,7 +31,7 @@ export async function handleUser({ req, res, log, error }) {
 
   try {
     if (req.method !== 'POST') throw new HttpError(405, 'method', 'Use POST.');
-    const body = req.bodyJson ?? safeJson(req.bodyText);
+    const body = safeJson(req.bodyText);
     const action = String(body?.action ?? '');
     const uid = req.headers['x-appwrite-user-id'];
     if (!uid) throw new HttpError(401, 'signed_out', 'Sign in to do that.');
@@ -189,6 +190,17 @@ const pickProfile = (r) => ({ id: r.$id, display_name: r.display_name, home_city
 
 async function logPrice(ctx, uid, p) {
   await ensureProfile(ctx, uid);
+  // A retry, a double tap or a lost response must never create a second price: the same client_ref returns the first.
+  const ref = typeof p.client_ref === 'string' ? p.client_ref.slice(0, 64) : '';
+  const rowId = ref ? `lg_${fnv1a64(`${uid}|${ref}`)}` : ID.unique();
+  if (ref) {
+    try {
+      const existing = await ctx.db.getRow({ databaseId: DB, tableId: 'price_logs', rowId });
+      return { id: existing.$id, duplicate: true, refresh: 'fresh' };
+    } catch (e) {
+      if (!isNotFound(e)) throw e;
+    }
+  }
   const { item, city, locality } = await placeFrom(ctx, p);
   const type = String(p.price_type);
   if (!PRICE_TYPES.includes(type)) throw bad('bad_type', 'Choose paid, quoted or listed.');
@@ -201,7 +213,7 @@ async function logPrice(ctx, uid, p) {
   const row = await ctx.db.createRow({
     databaseId: DB,
     tableId: 'price_logs',
-    rowId: ID.unique(),
+    rowId,
     data: {
       item_id: item.$id,
       locality_id: locality?.$id ?? null,
@@ -261,9 +273,14 @@ async function flag(ctx, uid, p) {
     if (isConflict(e)) throw new HttpError(409, 'already', 'You already flagged this price.');
     throw e;
   }
-  const { total } = await ctx.db.listRows({ databaseId: DB, tableId: 'flags', queries: [Query.equal('log_id', target.$id), Query.limit(1)] });
+  const all = await ctx.db.listRows({ databaseId: DB, tableId: 'flags', queries: [Query.equal('log_id', target.$id), Query.limit(50)] });
+  const total = all.total;
   const hidden = total >= LIMITS.flagsToHide;
-  await ctx.db.updateRow({ databaseId: DB, tableId: 'price_logs', rowId: target.$id, data: { flag_count: total, hidden } });
+  // Why it was flagged, most common first, so the author can see what to fix.
+  const tally = new Map();
+  for (const f of all.rows) tally.set(f.reason, (tally.get(f.reason) ?? 0) + 1);
+  const reasons = [...tally.entries()].sort((x, y) => y[1] - x[1]).map(([r]) => FLAG_REASON_WORDS[r] ?? r).join(', ');
+  await ctx.db.updateRow({ databaseId: DB, tableId: 'price_logs', rowId: target.$id, data: { flag_count: total, hidden, flag_reasons: reasons.slice(0, 150) || null } });
   return { flag_count: total, hidden, refresh: await refreshStats(ctx) };
 }
 

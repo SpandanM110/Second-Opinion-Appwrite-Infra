@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ArrowLeftRight, CircleHelp, Home, Newspaper, UserRound } from 'lucide-react';
+import { ArrowLeftRight, CircleHelp, Home, Newspaper, PenLine, UserRound } from 'lucide-react';
+import { useContribute } from '../lib/contribute';
 import { useRefData } from '../lib/ref';
 import { Logo } from './Logo';
 
@@ -19,6 +20,9 @@ const isActive = (pathname: string, to: string) => (to === '/check' ? pathname.s
 export function Layout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const ref = useRefData();
+  const contribute = useContribute();
+  // The card has its own "Add my price"; Me and the question page have their own actions.
+  const showFab = !pathname.startsWith('/item') && !pathname.startsWith('/me') && !pathname.startsWith('/q/');
 
   return (
     <div className="min-h-dvh pb-[calc(env(safe-area-inset-bottom)+84px)] md:pb-6">
@@ -82,7 +86,7 @@ export function Layout({ children }: { children: ReactNode }) {
             What is this?
           </Link>
           {' · '}
-          <Link className="underline underline-offset-2" href="/about#developers">
+          <Link className="underline underline-offset-2" href="/api">
             API
           </Link>
           {' · '}
@@ -91,6 +95,16 @@ export function Layout({ children }: { children: ReactNode }) {
           </a>
         </p>
       </footer>
+
+      {showFab && (
+        <button
+          type="button"
+          onClick={() => void contribute.openLog()}
+          className="btn-primary fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-20 h-12 rounded-full px-5 shadow-lg md:bottom-6"
+        >
+          <PenLine size={18} aria-hidden /> Share a price
+        </button>
+      )}
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Main">
         <ul className="grid h-[60px] grid-cols-4">

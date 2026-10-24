@@ -18,7 +18,7 @@ const MEANING: Record<Confidence, string> = {
 
 export function ConfidenceDot({ level }: { level: Confidence }) {
   const color = level === 'high' ? 'bg-high' : level === 'medium' ? 'bg-medium' : 'bg-faint';
-  return <span className={`inline-block size-2 shrink-0 rounded-full ${color}`} aria-label={`${STYLE[level].label} confidence`} />;
+  return <span className={`inline-block size-2 shrink-0 rounded-full ${color}`} role="img" aria-label={`${STYLE[level].label} confidence`} />;
 }
 
 export function ConfidenceBadge({ level, reason, compact = false }: { level: Confidence; reason: string; compact?: boolean }) {

@@ -1,4 +1,4 @@
-import { Client, TablesDB, Query, type Models } from 'appwrite';
+import { Account, Client, Functions, Storage, TablesDB, Query, type Models } from 'appwrite';
 
 // Public identifiers, safe to ship to the browser.
 export const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ?? 'https://sgp.cloud.appwrite.io/v1';
@@ -8,6 +8,10 @@ export const DB = 'main';
 
 export const client = new Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID);
 export const tables = new TablesDB(client);
+export const account = new Account(client);
+export const functions = new Functions(client);
+export const storage = new Storage(client);
+export const RECEIPTS_BUCKET = 'receipts';
 
 export async function listRows<T>(tableId: string, queries: string[] = []): Promise<T[]> {
   const res = await tables.listRows<Models.DefaultRow>({ databaseId: DB, tableId, queries });

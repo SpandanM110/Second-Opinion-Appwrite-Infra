@@ -24,7 +24,6 @@ export function PlaceChip({ className = '' }: { className?: string }) {
         type="button"
         onClick={() => setOpen(true)}
         className={`tap inline-flex max-w-full items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-[14px] font-medium hover:bg-canvas ${className}`}
-        aria-label={`Area: ${locality ? `${locality.name}, ` : ''}${city?.name ?? 'not set'}. Change area`}
       >
         <MapPin size={16} className="shrink-0 text-accent-ink" aria-hidden />
         <span className="truncate">
@@ -41,6 +40,7 @@ export function PlaceChip({ className = '' }: { className?: string }) {
           )}
         </span>
         <ChevronDown size={16} className="shrink-0 text-faint" aria-hidden />
+        <span className="sr-only">. Change area</span>
       </button>
       <PlacePicker open={open} onClose={() => setOpen(false)} />
     </>

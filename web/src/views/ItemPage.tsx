@@ -8,9 +8,10 @@ import { CardGuide } from '../components/CardGuide';
 import { FairRangeCard } from '../components/FairRangeCard';
 import { LogRow, PriceTypeHelp } from '../components/LogRow';
 import { PlaceChip } from '../components/PlacePicker';
-import { SignInSheet } from '../components/SignInSheet';
 import { CardSkeleton, Empty, ErrorState, ListSkeleton } from '../components/States';
 import { FAIR_RANGE_URL } from '../lib/appwrite';
+import { useContribute } from '../lib/contribute';
+import { useOnChange } from '../lib/events';
 import { usePlace } from '../lib/place';
 import { fetchCard, fetchRecentPrices, fetchUsers, type CardResult } from '../lib/queries';
 import { pushRecent } from '../lib/recent';
@@ -27,7 +28,7 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
   const router = useRouter();
   const ref = useRefData();
   const place = usePlace();
-  const [signIn, setSignIn] = useState<string | null>(null);
+  const contribute = useContribute();
 
   // A shared link (?c=&l=) shows that place; otherwise the user's current place.
   const item = ref.item(itemId);
@@ -56,6 +57,13 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
     const logs = await fetchRecentPrices({ itemId: item.$id, cityId: city.$id, localityId: scopeLocality });
     return { logs, users: await fetchUsers(logs.map((l) => l.user_id)) };
   }, [item?.$id, city?.$id, scopeLocality], seed ? { logs: seed.logs, users: new Map(seed.users.map((u) => [u.$id, u])) } : undefined);
+
+  // A price, confirmation or flag was just saved: refetch what is on screen. It fires again a few seconds later,
+  // once the fair range has been recomputed.
+  useOnChange(() => {
+    cardQ.reload();
+    logsQ.reload();
+  });
 
   if (ref.ready && !item) return <NotFound what="item" />;
 
@@ -89,8 +97,8 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
               card={card}
               staleSince={cardQ.data?.stale ? cardQ.data.fetchedAt : undefined}
               actions={{
-                onPaid: () => setSignIn('paid'),
-                onAsk: () => setSignIn('ask'),
+                onPaid: () => void contribute.openLog(itemId),
+                onAsk: () => void contribute.openAsk(itemId),
                 onCompare: () => router.push(`/compare/${itemId}${city ? `?a=${city.$id}` : ''}`),
               }}
             />
@@ -147,7 +155,6 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
         </aside>
       </div>
 
-      <SignInSheet open={signIn !== null} onClose={() => setSignIn(null)} reason={signIn ?? undefined} />
     </div>
   );
 }
@@ -161,7 +168,7 @@ function ApiSnippet({ url }: { url: string }) {
       </h2>
       <p className="mt-1 text-[13px] text-white/70">Any app or AI assistant can ask Second Opinion directly.</p>
       <div className="mt-3 flex items-stretch gap-2">
-        <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 text-[12px]">curl "{url}"</code>
+        <code tabIndex={0} className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 text-[12px]">curl "{url}"</code>
         <button
           type="button"
           className="tap inline-flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"

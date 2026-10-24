@@ -27,13 +27,12 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
   const sample = card
     ? JSON.stringify(
         {
-          item: card.item.id,
-          scope: card.scope.label,
-          median: card.range.median,
-          typical_range: [card.range.p25, card.range.p75],
-          confidence: card.confidence.level,
-          based_on: card.sample.line,
-          first_quote_multiple: card.overcharge?.index ?? null,
+          status: card.status,
+          item: { id: card.item.id, name: card.item.name, unitLabel: card.item.unitLabel },
+          scope: { type: card.scope.type, label: card.scope.label },
+          range: { median: card.range.median, p25: card.range.p25, p75: card.range.p75 },
+          confidence: { level: card.confidence.level, reason: card.confidence.reason },
+          overcharge: card.overcharge,
         },
         null,
         2,
@@ -186,7 +185,9 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
             <table className="w-full text-left text-[15px]">
               <thead className="bg-canvas text-[12px] uppercase tracking-wide text-faint">
                 <tr>
-                  <th scope="col" className="w-1/4 px-4 py-3 font-semibold">&nbsp;</th>
+                  <th scope="col" className="w-1/4 px-4 py-3 font-semibold">
+                    <span className="sr-only">What we compare</span>
+                  </th>
                   <th scope="col" className="px-4 py-3 font-semibold">A general assistant</th>
                   <th scope="col" className="px-4 py-3 font-semibold text-accent-ink">Second Opinion</th>
                 </tr>
@@ -300,15 +301,20 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
           <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-white/75">
             The card above is also an API: public, read-only, no key. Any app or AI assistant can ask Second Opinion what the fair price is. An MCP server is on the roadmap.
           </p>
+          <p className="mt-3">
+            <Link href="/api" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-white underline underline-offset-4">
+              Read the API reference and try it <ArrowRight size={16} aria-hidden />
+            </Link>
+          </p>
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
             <div className="min-w-0">
               <p className="mb-2 text-[13px] font-semibold text-white/60">Request</p>
-              <pre className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>curl "{apiUrl}"</code></pre>
+              <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>curl "{apiUrl}"</code></pre>
             </div>
             {sample && (
               <div className="min-w-0">
                 <p className="mb-2 text-[13px] font-semibold text-white/60">Response (shortened)</p>
-                <pre className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>{sample}</code></pre>
+                <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>{sample}</code></pre>
               </div>
             )}
           </div>

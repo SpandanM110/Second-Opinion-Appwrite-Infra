@@ -220,6 +220,7 @@
                         "per_km",
                         "per_visit",
                         "per_hour",
+                        "per_day",
                         "per_plate",
                         "each"
                     ],
@@ -291,6 +292,7 @@
                         "per_km",
                         "per_visit",
                         "per_hour",
+                        "per_day",
                         "per_plate",
                         "each"
                     ],
@@ -397,6 +399,13 @@
                     "required": false,
                     "array": false,
                     "default": 0
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
                 }
             ],
             "indexes": [
@@ -640,6 +649,13 @@
                     "required": true,
                     "array": false,
                     "default": null
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
                 }
             ],
             "indexes": [
@@ -703,6 +719,13 @@
                     "required": true,
                     "array": false,
                     "default": null
+                },
+                {
+                    "key": "is_seed",
+                    "type": "boolean",
+                    "required": false,
+                    "array": false,
+                    "default": false
                 }
             ],
             "indexes": [
@@ -822,6 +845,13 @@
                     "default": null
                 },
                 {
+                    "key": "oldest_log_at",
+                    "type": "datetime",
+                    "required": false,
+                    "array": false,
+                    "default": null
+                },
+                {
                     "key": "confidence",
                     "type": "string",
                     "format": "enum",
@@ -929,6 +959,15 @@
                     "key": "attached_stats_id",
                     "type": "varchar",
                     "size": 36,
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "attached_card",
+                    "type": "varchar",
+                    "size": 2000,
                     "required": false,
                     "array": false,
                     "default": null,

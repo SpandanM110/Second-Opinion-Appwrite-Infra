@@ -1,0 +1,5 @@
+[
+  { "id": "bhopal", "name": "Bhopal", "state": "Madhya Pradesh", "country": "India", "lat": 23.2599, "lng": 77.4126 },
+  { "id": "indore", "name": "Indore", "state": "Madhya Pradesh", "country": "India", "lat": 22.7196, "lng": 75.8577 },
+  { "id": "mumbai", "name": "Mumbai", "state": "Maharashtra", "country": "India", "lat": 19.0760, "lng": 72.8777 }
+]

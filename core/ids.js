@@ -1,0 +1,17 @@
+// Deterministic row ids, so re-running the seed or the stats Function
+// overwrites rows instead of duplicating them. Appwrite ids: ≤36 chars, [a-zA-Z0-9._-].
+
+const FNV_OFFSET = 0xcbf29ce484222325n;
+const FNV_PRIME = 0x100000001b3n;
+const MASK = 0xffffffffffffffffn;
+
+export function fnv1a64(input) {
+  let h = FNV_OFFSET;
+  for (const byte of new TextEncoder().encode(input)) {
+    h ^= BigInt(byte);
+    h = (h * FNV_PRIME) & MASK;
+  }
+  return h.toString(16).padStart(16, '0');
+}
+
+export const statsRowId = (itemId, scopeType, scopeId) => `st_${fnv1a64(`${itemId}|${scopeType}|${scopeId}`)}`;

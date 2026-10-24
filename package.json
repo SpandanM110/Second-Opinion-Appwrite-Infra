@@ -1,0 +1,21 @@
+{
+  "name": "second-opinion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Verified, locality-level price layer for the informal economy. Appwrite TablesDB hackathon build.",
+  "scripts": {
+    "test": "node --test core/core.test.js",
+    "sync:core": "node scripts/sync-core.mjs",
+    "seed": "node scripts/with-key.mjs tsx seed/seed.ts",
+    "seed:dry": "tsx seed/seed.ts --dry-run",
+    "stats": "appwrite functions create-execution --function-id compute-stats --async false",
+    "deploy:functions": "npm run sync:core && appwrite push functions --all --force"
+  },
+  "devDependencies": {
+    "node-appwrite": "^31.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}

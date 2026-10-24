@@ -1,0 +1,31 @@
+{
+  "categories": [
+    { "id": "auto-cab", "name": "Auto & cab", "unit": "per_km", "hyperlocal": true },
+    { "id": "home-services", "name": "Home services", "unit": "per_visit", "hyperlocal": true },
+    { "id": "haircuts", "name": "Haircuts", "unit": "each", "hyperlocal": true },
+    { "id": "street-food", "name": "Street food", "unit": "per_plate", "hyperlocal": false }
+  ],
+  "items": [
+    { "id": "auto-per-km", "category": "auto-cab", "name": "Auto ride", "unit": "per_km", "aliases": ["auto", "autorickshaw", "rickshaw", "tuk tuk", "ऑटो", "रिक्शा"], "base": { "bhopal": 18, "indore": 17, "mumbai": 18 }, "volume": 6 },
+    { "id": "auto-minimum-fare", "category": "auto-cab", "name": "Auto minimum fare", "unit": "each", "aliases": ["auto minimum", "base fare", "auto short ride"], "base": { "bhopal": 30, "indore": 30, "mumbai": 26 }, "volume": 1.2 },
+    { "id": "auto-station-to-centre", "category": "auto-cab", "name": "Auto, station to city centre", "unit": "each", "aliases": ["station auto", "railway station auto", "station to centre", "स्टेशन ऑटो"], "base": { "bhopal": 105, "indore": 120, "mumbai": 140 }, "volume": 1.6, "stationHeavy": true },
+    { "id": "cab-per-km", "category": "auto-cab", "name": "Local cab", "unit": "per_km", "aliases": ["taxi", "cab", "kaali peeli", "टैक्सी"], "base": { "bhopal": 16, "indore": 15, "mumbai": 22 }, "volume": 1.2 },
+    { "id": "bike-taxi-per-km", "category": "auto-cab", "name": "Bike taxi", "unit": "per_km", "aliases": ["bike taxi", "rapido", "two wheeler taxi", "बाइक टैक्सी"], "base": { "bhopal": 8, "indore": 8, "mumbai": 11 }, "volume": 1 },
+    { "id": "plumber-visit", "category": "home-services", "name": "Plumber visit", "unit": "per_visit", "aliases": ["plumber", "nal wala", "pipe repair", "प्लंबर"], "base": { "bhopal": 250, "indore": 250, "mumbai": 450 }, "volume": 1.1 },
+    { "id": "electrician-visit", "category": "home-services", "name": "Electrician visit", "unit": "per_visit", "aliases": ["electrician", "bijli wala", "wiring", "इलेक्ट्रीशियन"], "base": { "bhopal": 200, "indore": 200, "mumbai": 400 }, "volume": 1.1 },
+    { "id": "ac-service", "category": "home-services", "name": "AC service", "unit": "per_visit", "aliases": ["ac servicing", "ac cleaning", "split ac service", "एसी सर्विस"], "base": { "bhopal": 500, "indore": 500, "mumbai": 700 }, "volume": 0.9 },
+    { "id": "ro-service", "category": "home-services", "name": "RO water purifier service", "unit": "per_visit", "aliases": ["ro", "water purifier", "ro filter change", "आरओ"], "base": { "bhopal": 400, "indore": 400, "mumbai": 500 }, "volume": 0.8 },
+    { "id": "house-cleaning-2bhk", "category": "home-services", "name": "House deep cleaning (2 BHK)", "unit": "per_visit", "aliases": ["deep cleaning", "home cleaning", "safai", "सफाई"], "base": { "bhopal": 1800, "indore": 1800, "mumbai": 3000 }, "volume": 0.7 },
+    { "id": "painter-per-day", "category": "home-services", "name": "Painter", "unit": "per_day", "aliases": ["painter", "wall painting", "rangai", "पेंटर"], "base": { "bhopal": 700, "indore": 700, "mumbai": 1100 }, "volume": 0.7 },
+    { "id": "mens-haircut", "category": "haircuts", "name": "Men's haircut", "unit": "each", "aliases": ["haircut", "hair cut", "cutting", "baal katwana", "कटिंग"], "base": { "bhopal": 80, "indore": 80, "mumbai": 200 }, "volume": 1.4, "listed": true },
+    { "id": "mens-haircut-beard", "category": "haircuts", "name": "Men's haircut + beard", "unit": "each", "aliases": ["haircut and shave", "cutting shaving", "beard trim", "दाढ़ी"], "base": { "bhopal": 120, "indore": 120, "mumbai": 300 }, "volume": 1, "listed": true },
+    { "id": "womens-haircut", "category": "haircuts", "name": "Women's haircut", "unit": "each", "aliases": ["ladies haircut", "parlour haircut", "hair trim"], "base": { "bhopal": 250, "indore": 250, "mumbai": 600 }, "volume": 0.9, "listed": true },
+    { "id": "kids-haircut", "category": "haircuts", "name": "Kids' haircut", "unit": "each", "aliases": ["child haircut", "baby haircut", "बच्चों की कटिंग"], "base": { "bhopal": 60, "indore": 60, "mumbai": 150 }, "volume": 0.7, "listed": true },
+    { "id": "chai", "category": "street-food", "name": "Chai", "unit": "each", "aliases": ["tea", "cutting chai", "चाय"], "base": { "bhopal": 10, "indore": 10, "mumbai": 15 }, "volume": 1.3, "listed": true },
+    { "id": "samosa", "category": "street-food", "name": "Samosa", "unit": "each", "aliases": ["samosa", "समोसा"], "base": { "bhopal": 12, "indore": 12, "mumbai": 20 }, "volume": 1.1, "listed": true },
+    { "id": "poha-jalebi", "category": "street-food", "name": "Poha-jalebi", "unit": "per_plate", "aliases": ["poha", "jalebi", "पोहा जलेबी"], "base": { "bhopal": 30, "indore": 30, "mumbai": 50 }, "volume": 1.1, "listed": true },
+    { "id": "vada-pav", "category": "street-food", "name": "Vada pav", "unit": "each", "aliases": ["wada pav", "vadapav", "वड़ा पाव"], "base": { "bhopal": 20, "indore": 20, "mumbai": 18 }, "volume": 1, "listed": true },
+    { "id": "dosa", "category": "street-food", "name": "Masala dosa", "unit": "per_plate", "aliases": ["dosa", "dosai", "डोसा"], "base": { "bhopal": 60, "indore": 60, "mumbai": 80 }, "volume": 0.9, "listed": true },
+    { "id": "thali-local", "category": "street-food", "name": "Local thali", "unit": "per_plate", "aliases": ["thali", "meal", "khana", "थाली"], "base": { "bhopal": 120, "indore": 120, "mumbai": 200 }, "volume": 0.9, "listed": true }
+  ]
+}

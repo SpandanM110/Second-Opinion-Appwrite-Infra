@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* Visual language (build plan): one accent for actions; confidence uses meaning colours and
+   never the accent; chips are the only coloured text; near-black on white everywhere else. */
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Helvetica Neue", Arial, sans-serif;
+
+  --color-ink: #111827;
+  --color-muted: #4b5563;  /* 7.6:1 on white */
+  --color-faint: #6b7280;  /* 4.8:1 on white */
+  --color-line: #e5e7eb;
+  --color-canvas: #f5f6f8;
+  --color-surface: #ffffff;
+
+  --color-accent: #3730a3;
+  --color-accent-hover: #312e81;
+  --color-accent-soft: #eef2ff;
+  --color-accent-ink: #3730a3;
+
+  --color-high: #166534;
+  --color-high-soft: #dcfce7;
+  --color-medium: #92400e;
+  --color-medium-soft: #fef3c7;
+  --color-low: #374151;
+  --color-low-soft: #f3f4f6;
+
+  --color-warn: #9f1239;
+  --color-warn-soft: #fff1f2;
+
+  --color-scope-city: #075985;
+  --color-scope-city-soft: #e0f2fe;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-canvas text-ink antialiased;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+@utility tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+@utility btn {
+  @apply tap inline-flex items-center justify-center gap-2 rounded-xl px-4 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-white hover:bg-accent-hover;
+}
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-ink hover:bg-canvas;
+}
+@utility btn-ghost {
+  @apply btn text-accent-ink hover:bg-accent-soft;
+}
+@utility panel {
+  @apply rounded-2xl border border-line bg-surface;
+}
+@utility skeleton {
+  @apply animate-pulse rounded-md bg-line/70;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1159,5 +1159,23 @@
                 "rows.read"
             ]
         }
+    ],
+    "sites": [
+        {
+            "$id": "web",
+            "name": "Second Opinion",
+            "enabled": true,
+            "logging": true,
+            "framework": "nextjs",
+            "timeout": 30,
+            "installCommand": "npm install",
+            "buildCommand": "npm run build",
+            "outputDirectory": "./.next",
+            "buildRuntime": "node-22",
+            "adapter": "ssr",
+            "fallbackFile": null,
+            "specification": "s-0.5vcpu-512mb",
+            "path": "web"
+        }
     ]
 }

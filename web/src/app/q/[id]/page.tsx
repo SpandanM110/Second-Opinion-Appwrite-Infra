@@ -1,0 +1,7 @@
+import { QuoteCheckPage } from '../../../views/QuoteCheckPage';
+
+export const metadata = { title: 'Quote Check' };
+
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  return <QuoteCheckPage id={(await params).id} />;
+}

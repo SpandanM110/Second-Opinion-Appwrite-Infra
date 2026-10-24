@@ -1,0 +1,74 @@
+import 'server-only';
+import { cookies } from 'next/headers';
+import { Query } from 'appwrite';
+import { buildCard, stateIdOf } from '../core/card.js';
+import { DB, ENDPOINT, PROJECT_ID } from './appwrite';
+import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, UserRow } from './types';
+
+// Server-side reads: plain REST calls so Next's fetch cache can hold reference data.
+// Everything read here is public (read("any")), so no API key is involved.
+
+async function rest<T>(tableId: string, queries: string[], revalidate: number): Promise<T[]> {
+  const qs = queries.map((q) => `queries[]=${encodeURIComponent(q)}`).join('&');
+  const res = await fetch(`${ENDPOINT}/tablesdb/${DB}/tables/${tableId}/rows?${qs}`, {
+    headers: { 'X-Appwrite-Project': PROJECT_ID },
+    next: { revalidate },
+  });
+  if (!res.ok) throw new Error(`${tableId}: HTTP ${res.status}`);
+  return ((await res.json()) as { rows: T[] }).rows;
+}
+
+export interface RefData { cities: City[]; localities: Locality[]; categories: Category[]; items: Item[] }
+
+/** Reference data changes only on re-seed: cached for 10 minutes across requests. */
+export async function getRefData(): Promise<RefData> {
+  const all = [Query.limit(500)];
+  const [cities, localities, categories, items] = await Promise.all([
+    rest<City>('cities', all, 600),
+    rest<Locality>('localities', all, 600),
+    rest<Category>('categories', all, 600),
+    rest<Item>('items', all, 600),
+  ]);
+  return {
+    cities: cities.sort((a, b) => a.name.localeCompare(b.name)),
+    localities: localities.sort((a, b) => a.name.localeCompare(b.name)),
+    categories,
+    items,
+  };
+}
+
+export const PLACE_COOKIE = 'so_place';
+
+/** The user's place, mirrored into a cookie so the first paint is already for the right area. */
+export async function getPlaceCookie(): Promise<{ cityId: string; localityId: string | null } | null> {
+  const raw = (await cookies()).get(PLACE_COOKIE)?.value;
+  if (!raw) return null;
+  const [cityId, localityId] = decodeURIComponent(raw).split('|');
+  return cityId ? { cityId, localityId: localityId || null } : null;
+}
+
+/** Stats change at most hourly (plus on-demand runs): a 60 s cache is fresh enough. */
+export async function getCard(ref: RefData, itemId: string, cityId: string, localityId: string | null) {
+  const item = ref.items.find((i) => i.$id === itemId);
+  const city = ref.cities.find((c) => c.$id === cityId);
+  if (!item || !city) return null;
+  const locality = localityId ? (ref.localities.find((l) => l.$id === localityId && l.city_id === city.$id) ?? null) : null;
+  const category = ref.categories.find((c) => c.$id === item.category_id);
+  const scopeIds = [city.$id, stateIdOf(city), ...(locality ? [locality.$id] : [])];
+  const rows = await rest<PriceStat>('price_stats', [Query.equal('item_id', item.$id), Query.equal('scope_id', scopeIds), Query.limit(10)], 60);
+  const card = buildCard({ item, hyperlocal: category?.hyperlocal ?? true, city, locality, rows }) as Card;
+  return { card, item, city, locality, fetchedAt: new Date().toISOString() };
+}
+
+export async function getCityStats(cityIds: string[]) {
+  return rest<PriceStat>('price_stats', [Query.equal('scope_type', 'city'), Query.equal('scope_id', cityIds), Query.limit(200)], 60);
+}
+
+export async function getRecentLogs(itemId: string, cityId: string, localityId: string | null) {
+  const q = [Query.equal('city_id', cityId), Query.equal('item_id', itemId), Query.orderDesc('created_at'), Query.limit(5)];
+  if (localityId) q.push(Query.equal('locality_id', localityId));
+  const logs = await rest<PriceLog>('price_logs', q, 30);
+  const ids = [...new Set(logs.map((l) => l.user_id))];
+  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 300) : [];
+  return { logs, users };
+}

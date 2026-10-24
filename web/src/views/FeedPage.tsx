@@ -8,6 +8,7 @@ import { useOnChange } from '../lib/events';
 import { usePlace } from '../lib/place';
 import { fetchQuoteChecks, fetchRecentLogs, fetchUsers } from '../lib/queries';
 import { useRefData } from '../lib/ref';
+import type { QuoteCheck, UserRow } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
 
 const TABS = [
@@ -16,7 +17,9 @@ const TABS = [
 ] as const;
 
 /** What's happening in this city: questions from newcomers and the latest prices paid. */
-export function FeedPage() {
+export interface FeedInitial { cityId: string; qcs: QuoteCheck[]; users: UserRow[] }
+
+export function FeedPage({ initial }: { initial?: FeedInitial }) {
   const ref = useRefData();
   const place = usePlace();
   const [params, setParams] = useQueryState();
@@ -28,7 +31,7 @@ export function FeedPage() {
     if (tab !== 'questions') return null;
     const qcs = await fetchQuoteChecks(cityId);
     return { qcs, users: await fetchUsers(qcs.map((q) => q.user_id)) };
-  }, [cityId, tab]);
+  }, [cityId, tab], tab === 'questions' && initial?.cityId === cityId ? { qcs: initial.qcs, users: new Map(initial.users.map((u) => [u.$id, u])) } : undefined);
 
   const logsQ = useAsync(async () => {
     if (tab !== 'logs') return null;

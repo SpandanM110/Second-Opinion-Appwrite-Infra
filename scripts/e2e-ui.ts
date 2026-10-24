@@ -39,6 +39,21 @@ async function vitals(label: string) {
   console.log(`   vitals after "${label.slice(0, 40)}": ${m ? `script ${m.ScriptDuration?.toFixed(1)}s, heap ${((m.JSHeapUsedSize ?? 0) / 1e6).toFixed(0)}MB, nodes ${m.Nodes}, listeners ${m.JSEventListeners}` : 'NO RESPONSE'}`);
 }
 
+/** When the page stops answering, ask the debugger where the main thread is stuck. */
+async function diagnoseFreeze(): Promise<string> {
+  try {
+    const cdp = await page.createCDPSession();
+    const paused = new Promise<any>((resolve) => cdp.once('Debugger.paused', resolve));
+    await Promise.race([cdp.send('Debugger.enable'), new Promise((_, rej) => setTimeout(() => rej(new Error('debugger unreachable')), 4000))]);
+    await cdp.send('Debugger.pause').catch(() => {});
+    const ev = await Promise.race([paused, new Promise<null>((r) => setTimeout(() => r(null), 5000))]);
+    if (!ev) return 'main thread did not pause: renderer is blocked outside JavaScript (or idle but not answering)';
+    return 'JS stack: ' + ev.callFrames.slice(0, 8).map((f: any) => `${f.functionName || '(anon)'} @ ${String(f.url).split('/').slice(-2).join('/')}:${f.location.lineNumber + 1}`).join(' <- ');
+  } catch (e: any) {
+    return 'diagnosis failed: ' + String(e?.message ?? e).slice(0, 120);
+  }
+}
+
 async function step(name: string, fn: () => Promise<string | void>) {
   try {
     const note = await Promise.race([fn(), new Promise<never>((_, rej) => setTimeout(() => rej(new Error('step timed out after 90 s')), 90000))]);
@@ -49,7 +64,8 @@ async function step(name: string, fn: () => Promise<string | void>) {
   } catch (e: any) {
     failed++;
     const responsive = await Promise.race([page.evaluate(() => 1).then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), 4000))]).catch(() => false);
-    steps.push(`✗ ${name}: ${String(e?.message ?? e).slice(0, 400)}${responsive ? '' : '  [PAGE FROZEN]'}`);
+    const why = responsive ? '' : '  [PAGE FROZEN] ' + (await diagnoseFreeze());
+    steps.push(`✗ ${name}: ${String(e?.message ?? e).slice(0, 300)}${why}`);
     console.log(steps[steps.length - 1]);
     if (shotDir) await page.screenshot({ path: path.join(shotDir, `fail-${name.replace(/\W+/g, '_').slice(0, 40)}.png`) }).catch(() => {});
   }

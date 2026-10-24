@@ -24,7 +24,10 @@ for (const [profileName, net] of Object.entries(PROFILES)) {
   for (const [name, url] of PAGES) {
     const runs = [];
     for (let i = 0; i < 3; i++) {
-      const page = await browser.newPage();
+      // the tab Edge opened with is the foreground one; a tab opened later can start in the background, where painting is deferred
+      const page = (await browser.pages())[0];
+      await page.goto('about:blank');
+      await page.bringToFront();
       await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
       const cdp = await page.createCDPSession();
       await cdp.send('Network.enable');
@@ -53,7 +56,7 @@ for (const [profileName, net] of Object.entries(PROFILES)) {
       await new Promise((r) => setTimeout(r, 1500));
       const m = await page.evaluate(() => ({ fcp: performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0, lcp: window.__lcp }));
       runs.push({ ...m, loaded, bytes, js, reqs });
-      await page.close();
+      await cdp.detach();
     }
     const med = (k) => median(runs.map((r) => r[k]));
     console.log(

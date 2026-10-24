@@ -4,7 +4,7 @@ import { Query } from 'appwrite';
 import { buildCard, stateIdOf } from '../core/card.js';
 import { DB, ENDPOINT, PROJECT_ID } from './appwrite';
 import { splitRecent } from './recentPrices';
-import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, UserRow } from './types';
+import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, QuoteCheck, UserRow } from './types';
 
 // Server-side reads: plain REST calls so Next's fetch cache can hold reference data.
 // Everything read here is public (read("any")), so no API key is involved.
@@ -63,6 +63,14 @@ export async function getCard(ref: RefData, itemId: string, cityId: string, loca
 
 export async function getCityStats(cityIds: string[]) {
   return rest<PriceStat>('price_stats', [Query.equal('scope_type', 'city'), Query.equal('scope_id', cityIds), Query.limit(200)], 30);
+}
+
+/** The newest questions in a city (the Feed's first tab), with their askers, for the server-rendered first paint. */
+export async function getQuestions(cityId: string) {
+  const qcs = await rest<QuoteCheck>('quote_checks', [Query.equal('city_id', cityId), Query.orderDesc('created_at'), Query.limit(30)], 5);
+  const ids = [...new Set(qcs.map((q) => q.user_id))];
+  const users = ids.length ? await rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 60) : [];
+  return { qcs, users };
 }
 
 export const GUIDE_COOKIE = 'so_guide';

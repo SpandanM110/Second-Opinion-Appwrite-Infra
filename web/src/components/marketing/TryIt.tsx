@@ -20,6 +20,7 @@ export function TryIt() {
 
   const send = async () => {
     setBusy(true);
+    setState(null); // never leave the previous answer on screen while the next one loads
     const t0 = performance.now();
     try {
       const res = await fetch(url);

@@ -2,6 +2,7 @@
   "name": "second-opinion",
   "version": "0.2.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Verified, locality-level price layer for the informal economy. Appwrite TablesDB hackathon build.",
   "scripts": {

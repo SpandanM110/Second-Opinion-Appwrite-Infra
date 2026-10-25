@@ -2,19 +2,34 @@
 
 **Know the fair price before you pay.** Second Opinion is a verified, locality-level price layer for everything that isn't on an app: auto rides, plumbers, haircuts, street food. Locals share what they actually paid, newcomers check the fair range before they negotiate, and the community confirms or flags each other's numbers.
 
-Built solo for the **Appwrite Databases Hackathon**, on **Appwrite TablesDB**. Development started on October 24, 2026 (after the October 19 start of the hackathon).
+Built solo for the **Appwrite Databases Hackathon**, on **Appwrite TablesDB**. Development started on October 24, 2026 (after the October 19 start of the hackathon). Released under the [MIT License](LICENSE).
 
 |  |  |
 | --- | --- |
 | **Live app** | https://6adcc60d0036a5cd4f5c.appwrite.network |
 | **Public API** | https://6adcba4a001b8bfea9d0.appwrite.network/?item=auto-station-to-centre&locality=bpl-rani-kamlapati-station (reference and live try-it at `/api` in the app) |
 | **Version log** | [docs/gap-analysis.md](docs/gap-analysis.md): every release measured against the plan's acceptance criteria |
+| **UX plan** | [docs/ux-plan.md](docs/ux-plan.md): landing page, first run and user journey |
 
 ```bash
 curl "https://6adcba4a001b8bfea9d0.appwrite.network/?item=auto-station-to-centre&locality=bpl-rani-kamlapati-station"
 # → ₹105, most people paid ₹99–115, high confidence, 26 prices from 17 people,
 #   "first quotes here average 2.6x the fair price"
 ```
+
+## Contents
+
+- [Why an LLM can't answer this](#why-an-llm-cant-answer-this)
+- [What you can do](#what-you-can-do)
+- [How it works](#how-it-works)
+- [Appwrite usage](#appwrite-usage)
+- [Getting started](#getting-started)
+- [Quality](#quality)
+- [Repository layout](#repository-layout)
+- [Demo data](#demo-data)
+- [Roadmap](#roadmap)
+- [Open-source libraries and data](#open-source-libraries-and-data)
+- [License](#license)
 
 ## Why an LLM can't answer this
 
@@ -39,6 +54,8 @@ And because the fair range is an API, the next assistant can ask Second Opinion 
 | **Ask locals** | "Is ₹300 fair?" goes out with the current fair price attached; answers arrive live; the asker marks the helpful one |
 | **Dark mode** | Follows your device by default; one tap in the header switches and remembers your choice, with no flash on load. The dark palette is chosen for contrast (every pair 4.5:1 or better), not just inverted |
 | **Earn standing** | Newcomer → Regular → Trusted local, with a visible journey on your profile |
+
+The bare address always shows the landing page; nothing redirects a returning visitor.
 
 ## How it works
 
@@ -82,6 +99,48 @@ flowchart LR
 | **Storage** | Private `receipts` bucket (2 MB, images, encrypted). A receipt is readable only by the person who uploaded it |
 | **Sites** | Next.js app with server rendering, so the card arrives as HTML on slow connections |
 
+## Getting started
+
+### Prerequisites
+
+- Node.js 22 or newer
+- An [Appwrite Cloud](https://cloud.appwrite.io) account (the free plan is enough) and the [Appwrite CLI](https://appwrite.io/docs/tooling/command-line/installation)
+
+### Set up your own copy
+
+```bash
+npm install -g appwrite-cli && appwrite login
+npm install
+npm test                    # unit tests, no network needed
+npm run seed:dry            # generate the dataset locally and print the seed checklist
+npm run seed                # write it to Appwrite (mints a 1-hour API key), then recompute
+npm run deploy:functions    # sync core/ and push both Functions
+npm run deploy:web          # sync core/, deploy the site, then delete old builds
+```
+
+`appwrite.config.json` describes the whole project (database, tables, indexes, permissions, bucket, Functions, Site), so `appwrite push` recreates it in a fresh project. Update the project id in that file to your own first.
+
+### Run the site locally
+
+```bash
+cd web && npm install && npm run dev
+```
+
+### Commands
+
+| Command | What it does |
+| --- | --- |
+| `npm test` | Unit tests for the shared logic in `core/` |
+| `npm run sync:core` | Copy `core/` into each deploy target (the deploy scripts do this for you) |
+| `npm run seed` / `seed:dry` | Write or preview the demo dataset |
+| `npm run stats` | Recompute the fair ranges now (add `-- --audit` to count non-demo rows) |
+| `npm run deploy:functions` / `deploy:web` | Push the Functions or the Site, then prune old builds |
+| `npm run prune` | Delete all but the active build of the site and Functions |
+| `npm run warm` | Hit every route once so containers are awake before a demo |
+| `npm run test:e2e` | The write-path suite against your project |
+
+> **Free-plan note.** Every site deploy stores a full Next.js build (about 230 MB) and the plan includes 2 GB of storage, so nine deploys fill it and Appwrite blocks the whole project (HTTP 402) until usage drops. `deploy:web` and `deploy:functions` delete old builds automatically; run `npm run warm` after a deploy, because the first requests to each route are slow while containers start.
+
 ## Quality
 
 Everything below runs against the real backend, as real signed-in users, and cleans up after itself.
@@ -89,41 +148,25 @@ Everything below runs against the real backend, as real signed-in users, and cle
 | Check | Command | Covers |
 | --- | --- | --- |
 | Unit tests | `npm test` | Weighted percentiles, decay, standing, three-flag hide, confidence, overcharge, scope fallback, geo, input rules (15 tests) |
-| Write-path suite | `npm run test:e2e` | 39 checks as 5 real accounts: identity can't be forged, bad input is rejected with advice, receipts can't be stolen or reused, one confirmation and one flag each, third flag hides, daily limit, idempotent retries, the range updates within seconds |
-| UI journey | `node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts <url>` | 18 steps on a phone viewport: sign up through the log form, receipt upload, confirm, flag, ask, answer live, edit profile, sign out and in, offline queue |
+| Write-path suite | `npm run test:e2e` | 40 checks as 5 real accounts: identity can't be forged, bad input is rejected with advice, receipts can't be stolen or reused, one confirmation and one flag each, third flag hides, daily limit, idempotent retries, the range updates within seconds |
+| UI journey | `node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts <url>` | 22 steps on a phone viewport: sign up through the log form, receipt upload, confirm, flag, ask, answer live, edit profile, sign out and in, offline queue, the API page, not-found pages, both themes |
 | Accessibility | `node scripts/a11y.mjs <url>` | axe-core (WCAG 2.1 A/AA plus best practices) on every screen and the open sheets, in light and dark: 0 violations |
 | Page speed | `node scripts/perf.mjs <url>` | Fast 3G and Slow 3G with a 4x slower CPU, cold cache |
 
-## Repository
+The browser tests need a Chromium-based browser (Edge or Chrome) installed locally.
+
+## Repository layout
 
 | Path | What |
 | --- | --- |
-| `appwrite.config.json` | The whole Appwrite project as code: database, tables, indexes, permissions, bucket, Functions, Site |
-| `core/` | Pure, unit-tested logic shared by everything: stats engine, card model, geo, input rules (copied into each deploy target by `npm run sync:core`; edit `core/`, never the copies) |
+| `appwrite.config.json` | The whole Appwrite project as code |
+| `core/` | Pure, unit-tested logic shared by everything: stats engine, card model, geo, input rules. Copied into each deploy target by `npm run sync:core`; edit `core/`, never the copies |
 | `functions/worker`, `functions/fair-range` | The two Functions (the free plan allows two) |
 | `seed/` | Deterministic demo-data generator, reference data and seed runner |
 | `web/` | Next.js app (App Router, Tailwind): marketing and app shells, server-rendered card pages |
 | `scripts/` | Key minting, recompute, end-to-end and accessibility tests, cleanup |
 | `docs/` | `gap-analysis.md` (version log), `ux-plan.md` (landing page, first run and user journey) |
-
-## Run it
-
-```bash
-npm install -g appwrite-cli && appwrite login
-npm install
-npm test                    # unit tests
-npm run seed:dry            # generate the dataset locally and print the seed checklist
-npm run seed                # write it to Appwrite (mints a 1-hour API key), then recompute
-npm run deploy:functions    # sync core/ and push both Functions
-npm run deploy:web          # sync core/, deploy the site, then delete old builds
-npm run prune               # delete all but the active build of the site and Functions
-npm run stats               # recompute the fair ranges now (add -- --audit to count non-demo rows)
-npm run test:e2e            # the write-path suite against your project
-
-cd web && npm install && npm run dev
-```
-
-> **Free-plan note.** Every site deploy stores a full Next.js build (about 230 MB) and the plan includes 2 GB of storage, so nine deploys fill it and Appwrite blocks the whole project (HTTP 402) until usage drops. `deploy:web` and `deploy:functions` now delete old builds automatically; run `npm run warm` after a deploy, because the first requests to each route are slow while containers start.
+| `LICENSE` | MIT |
 
 ## Demo data
 
@@ -135,12 +178,18 @@ cd web && npm install && npm run dev
 - 10 deliberate outliers (a ₹900 auto per km, a ₹5 plumber visit) carry two flags each, so one more flag in the demo hides them.
 - 15 sample questions with answers. Receipt images on demo prices are placeholders marked with a diagonal band.
 
-Re-seeding only replaces rows marked `is_seed`; real people's prices are never touched.
-
-## Open-source libraries
-
-[Next.js](https://nextjs.org) · [React](https://react.dev) · [Tailwind CSS](https://tailwindcss.com) · [lucide-react](https://lucide.dev) · [Appwrite web SDK](https://github.com/appwrite/sdk-for-web) and [node-appwrite](https://github.com/appwrite/sdk-for-node) · [server-only](https://www.npmjs.com/package/server-only) · [TypeScript](https://www.typescriptlang.org) · [tsx](https://tsx.is) · [puppeteer-core](https://pptr.dev) and [axe-core](https://github.com/dequelabs/axe-core) (tests only).
+The prices are illustrative, not survey results, and should not be relied on for real purchases. Re-seeding only replaces rows marked `is_seed`; real people's prices are never touched.
 
 ## Roadmap
 
 An MCP server so assistants can ask for fair prices directly · more cities, opened by questions · VectorsDB alias matching ("tuk tuk" → autorickshaw) · a Hindi interface · a moderation queue · groceries and rent.
+
+## Open-source libraries and data
+
+[Next.js](https://nextjs.org) · [React](https://react.dev) · [Tailwind CSS](https://tailwindcss.com) · [lucide-react](https://lucide.dev) · [Appwrite web SDK](https://github.com/appwrite/sdk-for-web) and [node-appwrite](https://github.com/appwrite/sdk-for-node) · [server-only](https://www.npmjs.com/package/server-only) · [TypeScript](https://www.typescriptlang.org) · [tsx](https://tsx.is) · [puppeteer-core](https://pptr.dev) and [axe-core](https://github.com/dequelabs/axe-core) (tests only).
+
+Locality coordinates were checked against [OpenStreetMap](https://www.openstreetmap.org/copyright) (© OpenStreetMap contributors, ODbL); the repository ships its own coordinate values, not an OpenStreetMap extract. Each dependency keeps its own license; none are copied into this repository.
+
+## License
+
+Second Opinion is released under the [MIT License](LICENSE). Copyright © 2026 SpandanM110. You may use, copy, modify and distribute it, including commercially, as long as the copyright and license notice stay with it. It comes with no warranty.

@@ -1,7 +1,4 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { SEEN_COOKIE } from '../../lib/seen';
 import { LandingPage } from '../../views/LandingPage';
 
 export const metadata: Metadata = {
@@ -11,8 +8,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', images: ['/og'] },
 };
 
-// First-time visitors get the explanation; anyone who has engaged with it lands straight in the tool.
-export default async function Home() {
-  if ((await cookies()).has(SEEN_COOKIE)) redirect('/check');
+// The bare address always explains the product. The tool is one tap away ("Open the app") and at /check.
+export default function Home() {
   return <LandingPage />;
 }

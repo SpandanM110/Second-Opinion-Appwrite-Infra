@@ -265,6 +265,22 @@ try {
     await waitText('expired or was already used');
   });
 
+  await step('the public API works from its own page: Send returns 200 and a real price', async () => {
+    await page.goto(`${base}/api`, { waitUntil: 'networkidle0' });
+    await clickText('button', 'Send', 'main');
+    await page.waitForFunction(() => /"status": "ok"/.test(document.body.innerText) && /"median"/.test(document.body.innerText), { timeout: 30000, polling: 100 });
+    const t = await text();
+    if (!/200/.test(t)) throw new Error('no 200 badge');
+    return /"median": (d+)/.exec(t)?.[0];
+  });
+
+  await step('a link to something that does not exist says so (not "check your connection")', async () => {
+    await page.goto(`${base}/q/does-not-exist`, { waitUntil: 'networkidle0' });
+    await waitText('That question isn’t here');
+    await page.goto(`${base}/u/does-not-exist`, { waitUntil: 'networkidle0' });
+    await waitText('That profile isn’t here');
+  });
+
   await step('offline: a price is kept on the phone and sent when the connection returns', async () => {
     await page.goto(`${base}/check`, { waitUntil: 'networkidle0' });
     await clickText('button', 'Share a price');

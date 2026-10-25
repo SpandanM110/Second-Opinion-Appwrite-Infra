@@ -9,7 +9,7 @@ import { Price } from '../components/Price';
 import { parseCard } from '../components/QuoteCheckItem';
 import { ErrorState, ListSkeleton } from '../components/States';
 import { callWorker } from '../lib/api';
-import { client, DB } from '../lib/appwrite';
+import { client, DB, isNotFound } from '../lib/appwrite';
 import { useAuth } from '../lib/auth';
 import { friendlyAuthError } from '../lib/authErrors';
 import { rupees, timeAgo, verdict } from '../lib/format';
@@ -18,6 +18,7 @@ import { useRefData } from '../lib/ref';
 import { useToast } from '../lib/toast';
 import type { Reply, UserRow } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
+import { NotFound } from './NotFound';
 
 const TONE = { warn: 'bg-warn-soft text-warn', medium: 'bg-medium-soft text-medium', high: 'bg-high-soft text-high' } as const;
 
@@ -64,7 +65,7 @@ export function QuoteCheckPage({ id }: { id: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (q.status === 'error' && !q.data) return <ErrorState message="Couldn’t load this question." onRetry={q.reload} />;
+  if (q.status === 'error' && !q.data) return isNotFound(q.error) ? <NotFound what="question" /> : <ErrorState message="Couldn’t load this question." onRetry={q.reload} />;
   const qc = q.data;
   if (!qc) return <ListSkeleton rows={5} />;
 

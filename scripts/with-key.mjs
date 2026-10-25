@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
 const cfg = JSON.parse(fs.readFileSync(path.join(root, 'appwrite.config.json'), 'utf8'));
-const SCOPES = ['tables.read', 'rows.read', 'rows.write', 'buckets.read', 'files.read', 'files.write', 'functions.read', 'execution.read', 'execution.write', 'users.read', 'users.write'];
+const SCOPES = ['tables.read', 'rows.read', 'rows.write', 'buckets.read', 'files.read', 'files.write', 'functions.read', 'executions.read', 'executions.write', 'users.read', 'users.write'];
 
 const raw = execFileSync('appwrite', ['project', 'create-ephemeral-key', '--duration', '3600', ...SCOPES.flatMap((s) => ['--scopes', s]), '-R', '--show-secrets'], {
   cwd: root,

@@ -7,7 +7,9 @@ import { monthYear } from '../lib/format';
 import { fetchUser, fetchUserLogs } from '../lib/queries';
 import { useRefData } from '../lib/ref';
 import type { UserRow } from '../lib/types';
+import { isNotFound } from '../lib/appwrite';
 import { useAsync } from '../lib/useAsync';
+import { NotFound } from './NotFound';
 
 /** Minimal profile (F8): home city, reputation, logs, confirmations received, member since. */
 export function ProfilePage({ id }: { id: string }) {
@@ -17,7 +19,7 @@ export function ProfilePage({ id }: { id: string }) {
     return { user, logs };
   }, [id]);
 
-  if (q.status === 'error') return <ErrorState message="Couldn’t load this profile." onRetry={q.reload} />;
+  if (q.status === 'error') return isNotFound(q.error) ? <NotFound what="profile" /> : <ErrorState message="Couldn’t load this profile." onRetry={q.reload} />;
   if (!q.data) return <ListSkeleton rows={5} />;
   const { user, logs } = q.data;
   const home = ref.city(user.home_city_id);

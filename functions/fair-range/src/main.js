@@ -36,7 +36,7 @@ export default async ({ req, res, error }) => {
     new Client()
       .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
       .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-      .setKey(req.headers['x-appwrite-key']),
+      // no key: every table this reads is public (read: any), so the API runs with no more privilege than a visitor,
   );
 
   try {

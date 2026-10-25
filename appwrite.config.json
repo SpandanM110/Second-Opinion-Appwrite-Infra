@@ -1142,10 +1142,7 @@
             "execute": [
                 "any"
             ],
-            "scopes": [
-                "tables.read",
-                "rows.read"
-            ]
+            "scopes": []
         },
         {
             "$id": "worker",
@@ -1170,8 +1167,8 @@
                 "rows.write",
                 "users.read",
                 "files.read",
-                "execution.read",
-                "execution.write"
+                "executions.read",
+                "executions.write"
             ]
         }
     ],

@@ -1,4 +1,4 @@
-import { Account, Client, Functions, Storage, TablesDB, Query, type Models } from 'appwrite';
+import { Account, AppwriteException, Client, Functions, Storage, TablesDB, Query, type Models } from 'appwrite';
 
 // Public identifiers, safe to ship to the browser.
 export const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ?? 'https://sgp.cloud.appwrite.io/v1';
@@ -12,6 +12,9 @@ export const account = new Account(client);
 export const functions = new Functions(client);
 export const storage = new Storage(client);
 export const RECEIPTS_BUCKET = 'receipts';
+
+/** A missing row (a stale or mistyped link), as opposed to a network or server problem. */
+export const isNotFound = (e: unknown) => e instanceof AppwriteException && e.code === 404;
 
 export async function listRows<T>(tableId: string, queries: string[] = []): Promise<T[]> {
   const res = await tables.listRows<Models.DefaultRow>({ databaseId: DB, tableId, queries });

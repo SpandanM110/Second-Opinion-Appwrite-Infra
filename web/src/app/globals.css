@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 /* Visual language (build plan): one accent for actions; confidence uses meaning colours and
-   never the accent; chips are the only coloured text; near-black on white everywhere else. */
+   never the accent; chips are the only coloured text; near-black on white everywhere else.
+
+   Every colour is a token. Dark mode redefines the same tokens (below), so no component needs to know about it.
+   The dark palette is chosen for contrast, not inverted: every text/background pair is at least 4.5:1
+   (checked by scripts/a11y.mjs, which audits both themes). */
 @theme {
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Helvetica Neue", Arial, sans-serif;
 
@@ -15,10 +19,13 @@
   --color-accent: #3730a3;
   --color-accent-hover: #312e81;
   --color-accent-soft: #eef2ff;
-  --color-accent-ink: #3730a3;
+  --color-accent-ink: #3730a3;   /* accent as text or an icon on a surface */
+  --color-focus: #3730a3;
+  --color-cta-ink: #312e81;      /* text on a white button that sits on the accent colour */
 
   --color-high: #166534;
   --color-high-soft: #dcfce7;
+  --color-high-solid: #166534;   /* a filled badge with white text on it */
   --color-medium: #92400e;
   --color-medium-soft: #fef3c7;
   --color-low: #374151;
@@ -26,9 +33,113 @@
 
   --color-warn: #9f1239;
   --color-warn-soft: #fff1f2;
+  --color-warn-solid: #9f1239;
 
   --color-scope-city: #075985;
   --color-scope-city-soft: #e0f2fe;
+
+  /* the range bar */
+  --color-bar-tail: #cbd5e1;
+  --color-bar-band: #94a3b8;
+
+  /* a panel that stays dark in both themes (code, the API section) and its text */
+  --color-panel: #111827;
+  --color-panel-ink: #ffffff;
+
+  /* the opposite of the page: toasts */
+  --color-inverse: #111827;
+  --color-inverse-ink: #ffffff;
+}
+
+/* ---- Dark theme ----
+   Used when the visitor picked "Dark", or when they picked nothing and their device prefers it.
+   The same block appears twice because CSS has no way to share it between a media query and a selector. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-ink: #eceef3;
+    --color-muted: #b4bac7;   /* 9.3:1 on the surface */
+    --color-faint: #9aa2b3;   /* 6.9:1 on the page background */
+    --color-line: #2b3140;
+    --color-canvas: #0d0f14;
+    --color-surface: #161a22;
+
+    --color-accent: #4f46e5;
+    --color-accent-hover: #4338ca;
+    --color-accent-soft: #1d2048;
+    --color-accent-ink: #a5b4fc;
+    --color-focus: #a5b4fc;
+    --color-cta-ink: #312e81;
+
+    --color-high: #7ee2a0;
+    --color-high-soft: #12301f;
+    --color-high-solid: #15803d;
+    --color-medium: #fcd34d;
+    --color-medium-soft: #33270a;
+    --color-low: #cbd2dc;
+    --color-low-soft: #252a35;
+
+    --color-warn: #fda4af;
+    --color-warn-soft: #3a1520;
+    --color-warn-solid: #be123c;
+
+    --color-scope-city: #7dd3fc;
+    --color-scope-city-soft: #0b2a3d;
+
+    --color-bar-tail: #3a4252;
+    --color-bar-band: #6b7a96;
+
+    --color-panel: #090b10;
+    --color-panel-ink: #f3f4f6;
+
+    --color-inverse: #eceef3;
+    --color-inverse-ink: #111827;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-ink: #eceef3;
+  --color-muted: #b4bac7;
+  --color-faint: #9aa2b3;
+  --color-line: #2b3140;
+  --color-canvas: #0d0f14;
+  --color-surface: #161a22;
+
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-accent-soft: #1d2048;
+  --color-accent-ink: #a5b4fc;
+  --color-focus: #a5b4fc;
+  --color-cta-ink: #312e81;
+
+  --color-high: #7ee2a0;
+  --color-high-soft: #12301f;
+  --color-high-solid: #15803d;
+  --color-medium: #fcd34d;
+  --color-medium-soft: #33270a;
+  --color-low: #cbd2dc;
+  --color-low-soft: #252a35;
+
+  --color-warn: #fda4af;
+  --color-warn-soft: #3a1520;
+  --color-warn-solid: #be123c;
+
+  --color-scope-city: #7dd3fc;
+  --color-scope-city-soft: #0b2a3d;
+
+  --color-bar-tail: #3a4252;
+  --color-bar-band: #6b7a96;
+
+  --color-panel: #090b10;
+  --color-panel-ink: #f3f4f6;
+
+  --color-inverse: #eceef3;
+  --color-inverse-ink: #111827;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 @layer base {
@@ -41,7 +152,7 @@
     min-height: 100dvh;
   }
   :focus-visible {
-    outline: 3px solid var(--color-accent);
+    outline: 3px solid var(--color-focus);
     outline-offset: 2px;
     border-radius: 6px;
   }

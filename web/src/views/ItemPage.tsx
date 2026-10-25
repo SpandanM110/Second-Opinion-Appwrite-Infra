@@ -162,16 +162,16 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
 function ApiSnippet({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <section className="rounded-2xl bg-ink p-4 text-white" aria-labelledby="api-title">
+    <section className="rounded-2xl border border-line bg-panel p-4 text-panel-ink" aria-labelledby="api-title">
       <h2 id="api-title" className="flex items-center gap-2 text-[14px] font-semibold">
         <Code2 size={16} aria-hidden /> Same answer, as an API
       </h2>
-      <p className="mt-1 text-[13px] text-white/70">Any app or AI assistant can ask Second Opinion directly.</p>
+      <p className="mt-1 text-[13px] text-panel-ink/75">Any app or AI assistant can ask Second Opinion directly.</p>
       <div className="mt-3 flex items-stretch gap-2">
-        <code tabIndex={0} className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-white/10 px-3 py-2 text-[12px]">curl "{url}"</code>
+        <code tabIndex={0} className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-panel-ink/10 px-3 py-2 text-[12px]">curl "{url}"</code>
         <button
           type="button"
-          className="tap inline-flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
+          className="tap inline-flex items-center justify-center rounded-lg bg-panel-ink/10 hover:bg-panel-ink/20"
           aria-label="Copy curl command"
           onClick={() => {
             navigator.clipboard?.writeText(`curl "${url}"`).then(() => {

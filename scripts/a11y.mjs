@@ -37,26 +37,27 @@ async function audit(page, label) {
   }
 }
 
-for (const width of [375, 1280]) {
+for (const [width, scheme] of [[375, 'light'], [375, 'dark'], [1280, 'light'], [1280, 'dark']]) {
   const page = await browser.newPage();
+  await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
   await page.setViewport({ width, height: width < 700 ? 812 : 900, isMobile: width < 700, hasTouch: width < 700 });
   for (const [name, url] of PAGES) {
     await page.bringToFront();
     await page.goto(base + url, { waitUntil: 'networkidle0', timeout: 45000 });
     await new Promise((r) => setTimeout(r, 600));
-    await audit(page, `${name} @${width}`);
+    await audit(page, `${name} @${width} ${scheme}`);
   }
   // open sheets
   await page.goto(base + '/check', { waitUntil: 'networkidle0' });
   await page.evaluate(() => [...document.querySelectorAll('button')].find((b) => /Share a price/.test(b.textContent ?? ''))?.click());
   await page.waitForSelector('dialog[open]');
   await new Promise((r) => setTimeout(r, 400));
-  await audit(page, `account sheet @${width}`);
+  await audit(page, `account sheet @${width} ${scheme}`);
   await page.keyboard.press('Escape');
   await page.evaluate(() => [...document.querySelectorAll('button')].find((b) => /Choose your area/.test(b.textContent ?? ''))?.click());
   await page.waitForSelector('dialog[open]');
   await new Promise((r) => setTimeout(r, 400));
-  await audit(page, `area picker @${width}`);
+  await audit(page, `area picker @${width} ${scheme}`);
   await page.close();
 }
 await browser.close();

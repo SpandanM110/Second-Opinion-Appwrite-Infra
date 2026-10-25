@@ -22,7 +22,7 @@ const freePort = () =>
 export async function launchEdge() {
   const port = await freePort();
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'so-edge-'));
-  const child = spawn(EXE, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, 'about:blank'], { stdio: 'ignore' });
+  const child = spawn(EXE, ['--headless=new', '--disable-extensions', '--disable-gpu', '--no-first-run', '--no-default-browser-check', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, 'about:blank'], { stdio: 'ignore' });
   let browser;
   for (let i = 0; i < 60 && !browser; i++) {
     try {

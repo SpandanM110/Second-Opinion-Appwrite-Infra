@@ -37,6 +37,7 @@ And because the fair range is an API, the next assistant can ask Second Opinion 
 | **Share a price** | Pick the item and area (GPS-aware), type the amount, optionally attach a receipt photo. Saved drafts, sanity checks that name the unit, an offline queue |
 | **Verify** | One tap to confirm a price you've paid too; flag one that looks wrong, with a reason. Three flags from different people hide a price |
 | **Ask locals** | "Is ₹300 fair?" goes out with the current fair price attached; answers arrive live; the asker marks the helpful one |
+| **Dark mode** | Follows your device by default; one tap in the header switches and remembers your choice, with no flash on load. The dark palette is chosen for contrast (every pair 4.5:1 or better), not just inverted |
 | **Earn standing** | Newcomer → Regular → Trusted local, with a visible journey on your profile |
 
 ## How it works
@@ -90,7 +91,7 @@ Everything below runs against the real backend, as real signed-in users, and cle
 | Unit tests | `npm test` | Weighted percentiles, decay, standing, three-flag hide, confidence, overcharge, scope fallback, geo, input rules (15 tests) |
 | Write-path suite | `npm run test:e2e` | 39 checks as 5 real accounts: identity can't be forged, bad input is rejected with advice, receipts can't be stolen or reused, one confirmation and one flag each, third flag hides, daily limit, idempotent retries, the range updates within seconds |
 | UI journey | `node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts <url>` | 18 steps on a phone viewport: sign up through the log form, receipt upload, confirm, flag, ask, answer live, edit profile, sign out and in, offline queue |
-| Accessibility | `node scripts/a11y.mjs <url>` | axe-core (WCAG 2.1 A/AA plus best practices) on every screen and the open sheets: 0 violations |
+| Accessibility | `node scripts/a11y.mjs <url>` | axe-core (WCAG 2.1 A/AA plus best practices) on every screen and the open sheets, in light and dark: 0 violations |
 | Page speed | `node scripts/perf.mjs <url>` | Fast 3G and Slow 3G with a 4x slower CPU, cold cache |
 
 ## Repository

@@ -7,6 +7,7 @@ import { ArrowLeftRight, CircleHelp, Home, Newspaper, PenLine, UserRound } from 
 import { useContribute } from '../lib/contribute';
 import { useRefData } from '../lib/ref';
 import { Logo } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
 
 const TABS = [
   { to: '/check', label: 'Check', Icon: Home },
@@ -61,6 +62,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <Link href="/about" className="tap ml-auto inline-flex items-center justify-center rounded-lg text-muted hover:text-ink md:hidden" aria-label="What is this?">
             <CircleHelp size={22} aria-hidden />
           </Link>
+          <ThemeToggle />
         </div>
       </header>
 

@@ -187,7 +187,7 @@ function Dashboard() {
         <ol className="mt-3 space-y-2.5">
           {steps.map((s) => (
             <li key={s.label} className="flex items-start gap-3 text-[15px]">
-              <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full ${s.done ? 'bg-high text-white' : 'border-2 border-line text-transparent'}`} aria-hidden>
+              <span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full ${s.done ? 'bg-high-solid text-white' : 'border-2 border-line text-transparent'}`} aria-hidden>
                 {s.done ? <Check size={13} strokeWidth={3} /> : <Circle size={1} />}
               </span>
               <span className={`min-w-0 flex-1 ${s.done ? 'text-muted' : 'font-medium'}`}>

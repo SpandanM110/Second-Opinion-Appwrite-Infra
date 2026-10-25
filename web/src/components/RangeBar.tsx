@@ -24,12 +24,12 @@ export function RangeBar({ p10, p25, median, p75, p90, marker, compact = false }
     <figure className={compact ? '' : 'pt-1'} aria-label={`Range: 10% paid under ₹${rupees(p10)}, half paid between ₹${rupees(p25)} and ₹${rupees(p75)}, 10% paid over ₹${rupees(p90)}.`}>
       <div className={`relative ${compact ? 'h-5' : 'h-7'}`} aria-hidden>
         <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-line" />
-        <div className="absolute top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-[#cbd5e1]" style={{ left: pct(p10), right: `calc(100% - ${pct(p90)})` }} />
-        <div className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-[#94a3b8] ${compact ? 'h-2.5' : 'h-3.5'}`} style={{ left: pct(p25), right: `calc(100% - ${pct(p75)})` }} />
+        <div className="absolute top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-bar-tail" style={{ left: pct(p10), right: `calc(100% - ${pct(p90)})` }} />
+        <div className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-bar-band ${compact ? 'h-2.5' : 'h-3.5'}`} style={{ left: pct(p25), right: `calc(100% - ${pct(p75)})` }} />
         <div className={`absolute top-1/2 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink ${compact ? 'h-4' : 'h-6'}`} style={{ left: pct(median) }} />
         {marker && (
           <div className="absolute top-1/2 -translate-y-1/2" style={{ left: markerPos }}>
-            <div className={`-translate-x-1/2 rounded-full border-2 border-white bg-warn shadow ${compact ? 'size-3' : 'size-4'}`} />
+            <div className={`-translate-x-1/2 rounded-full border-2 border-surface bg-warn-solid shadow ${compact ? 'size-3' : 'size-4'}`} />
           </div>
         )}
       </div>

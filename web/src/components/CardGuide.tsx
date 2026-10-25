@@ -27,7 +27,7 @@ export function CardGuide({ defaultOpen }: { defaultOpen: boolean }) {
             document.cookie = `${GUIDE_COOKIE}=1; path=/; max-age=31536000; samesite=lax`;
             setOpen(false);
           }}
-          className="tap -mr-2 -mt-2 inline-flex items-center justify-center rounded-lg text-accent-ink hover:bg-white/60"
+          className="tap -mr-2 -mt-2 inline-flex items-center justify-center rounded-lg text-accent-ink hover:bg-surface/60"
           aria-label="Got it, hide this"
         >
           <X size={18} aria-hidden />

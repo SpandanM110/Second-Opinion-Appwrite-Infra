@@ -54,7 +54,19 @@ async function diagnoseFreeze(): Promise<string> {
   }
 }
 
+// every navigation and failed request, so a failure can be matched to a surprise reload
+const trail: string[] = [];
+const T0 = Date.now();
+const stamp0 = () => ((Date.now() - T0) / 1000).toFixed(1) + 's';
+page.on('framenavigated', (f) => f === page.mainFrame() && trail.push(`${stamp0()} navigated ${f.url().replace(base, '')}`));
+page.on('requestfailed', (r) => {
+  const why = r.failure()?.errorText ?? '';
+  if (!/ERR_ABORTED/.test(why)) trail.push(`${stamp0()} request failed ${r.url().replace(base, '').slice(0, 70)} ${why}`);
+});
+page.on('response', (r) => r.status() >= 500 && trail.push(`${stamp0()} HTTP ${r.status()} ${r.url().replace(base, '').slice(0, 70)}`));
+
 async function step(name: string, fn: () => Promise<string | void>) {
+  if (process.env.E2E_ONLY && !new RegExp(process.env.E2E_ONLY).test(name)) return; // E2E_ONLY="public API" runs just that step
   try {
     const note = await Promise.race([fn(), new Promise<never>((_, rej) => setTimeout(() => rej(new Error('step timed out after 90 s')), 90000))]);
     steps.push(`✓ ${name}${note ? ` — ${note}` : ''}`);
@@ -65,7 +77,8 @@ async function step(name: string, fn: () => Promise<string | void>) {
     failed++;
     const responsive = await Promise.race([page.evaluate(() => 1).then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), 4000))]).catch(() => false);
     const why = responsive ? '' : '  [PAGE FROZEN] ' + (await diagnoseFreeze());
-    steps.push(`✗ ${name}: ${String(e?.message ?? e).slice(0, 300)}${why}`);
+    steps.push(`✗ ${name}: ${String(e?.message ?? e).slice(0, 300)}${why}
+      recent: ${trail.slice(-6).join(' | ')}`);
     console.log(steps[steps.length - 1]);
     if (shotDir) await page.screenshot({ path: path.join(shotDir, `fail-${name.replace(/\W+/g, '_').slice(0, 40)}.png`) }).catch(() => {});
   }
@@ -95,6 +108,20 @@ const typeInto = async (sel: string, value: string) => {
 };
 
 try {
+  await step('dark mode: one tap switches, it survives a reload, and the page really changes colour', async () => {
+    await page.goto(`${base}/check`, { waitUntil: 'networkidle0' });
+    const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    const before = await bg();
+    await page.click('button[aria-label^="Switch to the"]');
+    const theme = await page.evaluate(() => document.documentElement.dataset.theme);
+    const after = await bg();
+    if (!theme || after === before) throw new Error(`no change: ${theme} ${before} → ${after}`);
+    await page.reload({ waitUntil: 'networkidle0' });
+    const kept = await page.evaluate(() => document.documentElement.dataset.theme);
+    if (kept !== theme || (await bg()) !== after) throw new Error('choice lost on reload');
+    await page.click('button[aria-label^="Switch to the"]'); // back to where we started
+    return `${before} → ${after} (${theme})`;
+  });
   await step('signed-out: the share button asks you to create an account first', async () => {
     await page.goto(`${base}/check`, { waitUntil: 'networkidle0' });
     await clickText('button', 'Share a price');
@@ -270,8 +297,8 @@ try {
     await clickText('button', 'Send', 'main');
     await page.waitForFunction(() => /"status": "ok"/.test(document.body.innerText) && /"median"/.test(document.body.innerText), { timeout: 30000, polling: 100 });
     const t = await text();
-    if (!/200/.test(t)) throw new Error('no 200 badge');
-    return /"median": (d+)/.exec(t)?.[0];
+    if (!/200/.test(t)) throw new Error('no 200 badge');
+    return /"median": ([0-9]+)/.exec(t)?.[0];
   });
 
   await step('a link to something that does not exist says so (not "check your connection")', async () => {

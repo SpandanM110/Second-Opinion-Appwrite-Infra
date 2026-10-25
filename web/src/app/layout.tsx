@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 import { getPlaceCookie, getRefData } from '../lib/server';
+import { THEME_INIT_SCRIPT } from '../components/ThemeToggle';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
@@ -16,7 +17,11 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#ffffff',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#161a22' },
+  ],
+  colorScheme: 'light dark',
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -25,7 +30,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const place = valid ? { ...cookiePlace, source: 'manual' as const } : { cityId: 'bhopal', localityId: null, source: 'default' as const };
 
   return (
-    <html lang="en-IN">
+    <html lang="en-IN" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <Providers refData={refData} place={place}>
           {children}

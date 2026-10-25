@@ -8,9 +8,9 @@ interface ToastApi { toast: (message: string, tone?: Tone) => void }
 const Ctx = createContext<ToastApi | null>(null);
 
 const STYLE: Record<Tone, { cls: string; Icon: typeof Info }> = {
-  ok: { cls: 'bg-ink text-white', Icon: CheckCircle2 },
-  info: { cls: 'bg-ink text-white', Icon: Info },
-  error: { cls: 'bg-warn text-white', Icon: TriangleAlert },
+  ok: { cls: 'bg-inverse text-inverse-ink', Icon: CheckCircle2 },
+  info: { cls: 'bg-inverse text-inverse-ink', Icon: Info },
+  error: { cls: 'bg-warn-solid text-white', Icon: TriangleAlert },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {

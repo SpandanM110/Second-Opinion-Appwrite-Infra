@@ -293,28 +293,28 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
       </section>
 
       {/* 8 · Developers */}
-      <section id="developers" className="scroll-mt-20 border-y border-line bg-ink px-4 py-12 text-white sm:py-16" aria-labelledby="dev-title">
+      <section id="developers" className="scroll-mt-20 border-y border-line bg-panel px-4 py-12 text-panel-ink sm:py-16" aria-labelledby="dev-title">
         <div className="mx-auto max-w-5xl">
           <h2 id="dev-title" className="flex items-center gap-3 text-[28px] font-bold tracking-tight sm:text-[36px]">
             <Code2 aria-hidden /> Built to be asked
           </h2>
-          <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-white/75">
+          <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-panel-ink/80">
             The card above is also an API: public, read-only, no key. Any app or AI assistant can ask Second Opinion what the fair price is. An MCP server is on the roadmap.
           </p>
           <p className="mt-3">
-            <Link href="/api" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-white underline underline-offset-4">
+            <Link href="/api" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-panel-ink underline underline-offset-4">
               Read the API reference and try it <ArrowRight size={16} aria-hidden />
             </Link>
           </p>
           <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
             <div className="min-w-0">
-              <p className="mb-2 text-[13px] font-semibold text-white/60">Request</p>
-              <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>curl "{apiUrl}"</code></pre>
+              <p className="mb-2 text-[13px] font-semibold text-panel-ink/70">Request</p>
+              <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-panel-ink/10 p-4 text-[13px] leading-relaxed"><code>curl "{apiUrl}"</code></pre>
             </div>
             {sample && (
               <div className="min-w-0">
-                <p className="mb-2 text-[13px] font-semibold text-white/60">Response (shortened)</p>
-                <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-white/10 p-4 text-[13px] leading-relaxed"><code>{sample}</code></pre>
+                <p className="mb-2 text-[13px] font-semibold text-panel-ink/70">Response (shortened)</p>
+                <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-panel-ink/10 p-4 text-[13px] leading-relaxed"><code>{sample}</code></pre>
               </div>
             )}
           </div>
@@ -360,7 +360,7 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-[17px] text-white/80">Free, no account, built on what your neighbours actually paid.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/check" className="btn bg-white text-accent-ink hover:bg-accent-soft">
+            <Link href="/check" className="btn bg-white text-cta-ink hover:bg-white/90">
               Open the app <ArrowRight size={16} aria-hidden />
             </Link>
             <Link href="/feed" className="btn border border-white/40 text-white hover:bg-white/10">

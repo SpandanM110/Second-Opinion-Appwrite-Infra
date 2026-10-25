@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '../Logo';
+import { ThemeToggle } from '../ThemeToggle';
 
 const NAV = [
   ['/about#how', 'How it works'],
@@ -27,6 +28,7 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
         <Link href="/check" className="btn-primary ml-auto h-10 px-4 text-[14px] lg:ml-2">
           Open the app
         </Link>
+        <ThemeToggle />
       </div>
     </header>
   );

@@ -10,13 +10,14 @@
     "seed": "node scripts/with-key.mjs tsx seed/seed.ts",
     "seed:dry": "tsx seed/seed.ts --dry-run",
     "stats": "node scripts/with-key.mjs node scripts/recompute.mjs",
-    "deploy:functions": "npm run sync:core && appwrite push functions --all --force",
-    "deploy:web": "npm run sync:core && appwrite push sites --all --force",
+    "deploy:functions": "npm run sync:core && appwrite push functions --all --force && npm run prune",
+    "deploy:web": "npm run sync:core && appwrite push sites --all --force && npm run prune",
     "test:e2e": "node scripts/with-key.mjs npx tsx scripts/e2e-backend.ts",
     "warm": "node scripts/warm.mjs",
     "test:ui": "node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts",
     "a11y": "node scripts/a11y.mjs",
-    "perf": "node scripts/perf.mjs"
+    "perf": "node scripts/perf.mjs",
+    "prune": "node scripts/prune-deployments.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

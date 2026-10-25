@@ -114,12 +114,15 @@ npm test                    # unit tests
 npm run seed:dry            # generate the dataset locally and print the seed checklist
 npm run seed                # write it to Appwrite (mints a 1-hour API key), then recompute
 npm run deploy:functions    # sync core/ and push both Functions
-npm run deploy:web          # sync core/ and deploy the site
+npm run deploy:web          # sync core/, deploy the site, then delete old builds
+npm run prune               # delete all but the active build of the site and Functions
 npm run stats               # recompute the fair ranges now (add -- --audit to count non-demo rows)
 npm run test:e2e            # the write-path suite against your project
 
 cd web && npm install && npm run dev
 ```
+
+> **Free-plan note.** Every site deploy stores a full Next.js build (about 230 MB) and the plan includes 2 GB of storage, so nine deploys fill it and Appwrite blocks the whole project (HTTP 402) until usage drops. `deploy:web` and `deploy:functions` now delete old builds automatically; run `npm run warm` after a deploy, because the first requests to each route are slow while containers start.
 
 ## Demo data
 

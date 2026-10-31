@@ -112,6 +112,8 @@ flowchart LR
 | **Storage** | Private `receipts` bucket (2 MB, images, encrypted). A receipt is readable only by the person who uploaded it |
 | **Sites** | Next.js app with server rendering, so the card arrives as HTML on slow connections |
 
+TablesDB is the only database on purpose: its unique composite indexes and read-only row permissions enforce the trust rules, and the free plan allows one database per project (VectorsDB alias matching was probed and is on the roadmap; see the version log).
+
 ## Getting started
 
 ### Prerequisites

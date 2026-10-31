@@ -319,6 +319,12 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
                 'data',
               ],
               ['How do you stop fake or silly prices?', 'Prices are weighted by the author’s record. New accounts count at half weight, receipts count double, old prices fade, one odd price barely moves a range, and three flags hide a price completely.', false, undefined],
+              [
+                'What stops a group from pushing a price up?',
+                'The fair price is a weighted median, so a group has to out-weigh the honest majority, not out-post it. New accounts count at half weight for their first 10 prices, a price without a receipt counts half as much as one with, each person can confirm a price only once, three flags hide it and cost its author standing, and nobody can log more than 20 prices a day. A price logged as a quote never feeds the fair price at all; it only raises the overcharge warning. Where an area has too little data to resist a small group, the badge says Medium or Low and the card falls back to the city-wide number, which is far harder to move. The open gap is one person making many accounts; email or phone verification and a review queue for sudden moves are next.',
+                false,
+                'gaming',
+              ],
               ['Why no shop names?', 'Prices belong to an item and an area, never to a person or a business. It keeps the data fair and protects everyone from false accusations.', false, undefined],
               ['My city isn’t listed.', 'We start with Bhopal, Indore and Mumbai and add cities as locals show up.', false, undefined],
             ].map(([q, a, open, id]) => (

@@ -99,6 +99,7 @@ flowchart LR
 - **Hiding is reversible and explained.** The third flag hides a price immediately, and the author sees why, so honest mistakes (wrong unit) can be shared again correctly.
 - **Standing is recomputed from scratch** on every run (+0.1 per confirmation, −0.3 per flag), so it can't drift or be tampered with.
 - **No vendor names, ever.** Prices belong to an item and an area, never a shop or a person.
+- **A group can't out-post the honest majority.** The weighted median only moves when fake prices out-weigh real ones, and every lever cuts a lobby's weight: half weight for new accounts, double for receipts they can't produce, one confirmation per person, three flags hide a price and cost its author standing, 20 prices a day, and quotes never feed the fair price. Thin areas show Medium or Low confidence and fall back to the city number. The remaining gap is one person making many accounts; email/phone verification and a review queue for sudden moves are the next step.
 
 ## Appwrite usage
 

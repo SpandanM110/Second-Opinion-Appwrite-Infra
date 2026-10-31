@@ -8,8 +8,6 @@ Built solo for the **Appwrite Databases Hackathon**, on **Appwrite TablesDB**. D
 | --- | --- |
 | **Live app** | https://6adcc60d0036a5cd4f5c.appwrite.network |
 | **Public API** | https://6adcba4a001b8bfea9d0.appwrite.network/?item=auto-station-to-centre&locality=bpl-rani-kamlapati-station (reference and live try-it at `/api` in the app) |
-| **Version log** | [docs/gap-analysis.md](docs/gap-analysis.md): every release measured against the plan's acceptance criteria |
-| **UX plan** | [docs/ux-plan.md](docs/ux-plan.md): landing page, first run and user journey · [docs/final-polish-plan.md](docs/final-polish-plan.md): the pre-submission pass on the first visit |
 
 ```bash
 curl "https://6adcba4a001b8bfea9d0.appwrite.network/?item=auto-station-to-centre&locality=bpl-rani-kamlapati-station"
@@ -112,7 +110,7 @@ flowchart LR
 | **Storage** | Private `receipts` bucket (2 MB, images, encrypted). A receipt is readable only by the person who uploaded it |
 | **Sites** | Next.js app with server rendering, so the card arrives as HTML on slow connections |
 
-TablesDB is the only database on purpose: its unique composite indexes and read-only row permissions enforce the trust rules, and the free plan allows one database per project (VectorsDB alias matching was probed and is on the roadmap; see the version log).
+TablesDB is the only database on purpose: its unique composite indexes and read-only row permissions enforce the trust rules, and the free plan allows one database per project (VectorsDB alias matching was probed, hit that limit, and stays on the roadmap).
 
 ## Getting started
 
@@ -184,7 +182,6 @@ The browser tests need a Chromium-based browser (Edge or Chrome) installed local
 | `seed/` | Deterministic demo-data generator, reference data and seed runner |
 | `web/` | Next.js app (App Router, Tailwind): marketing and app shells, server-rendered card pages |
 | `scripts/` | Key minting (`with-key`), recompute, the browser launcher (`edge`), tests (`e2e-backend`, `e2e-ui`, `a11y`, `perf`, `perf-trace`, `shots`), `warm`, `prune-deployments`, `sync-core`, cleanup |
-| `docs/` | `gap-analysis.md` (version log and incidents), `ux-plan.md` (front door, first run and user journey), `final-polish-plan.md` (the pre-submission UX pass) |
 | `Second Opinion Hackathon Scope & Build Plan.md` | The original scope and acceptance criteria every version is measured against |
 | `LICENSE` | MIT |
 

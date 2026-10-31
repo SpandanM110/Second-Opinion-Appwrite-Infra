@@ -24,7 +24,7 @@ export function FeedPage({ initial }: { initial?: FeedInitial }) {
   const place = usePlace();
   const [params, setParams] = useQueryState();
   const tab = params.get('tab') === 'logs' ? 'logs' : 'questions';
-  const cityId = ref.city(params.get('city'))?.$id ?? place.city?.$id ?? 'bhopal';
+  const cityId = place.city?.$id ?? 'bhopal';
   const city = ref.city(cityId);
 
   const qcQ = useAsync(async () => {
@@ -52,23 +52,10 @@ export function FeedPage({ initial }: { initial?: FeedInitial }) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <header className="flex flex-wrap items-end justify-between gap-3">
+      <header>
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight sm:text-[28px]">{city?.name ?? ''} feed</h1>
-          <p className="mt-1 text-[15px] text-muted">Newcomers ask if a quote is fair; locals answer and share what they paid.</p>
-        </div>
-        <div className="flex gap-1 rounded-xl bg-surface p-1 shadow-sm" role="group" aria-label="City">
-          {ref.cities.map((c) => (
-            <button
-              key={c.$id}
-              type="button"
-              aria-pressed={c.$id === cityId}
-              onClick={() => setParam('city', c.$id)}
-              className={`tap rounded-lg px-3 text-[14px] font-semibold ${c.$id === cityId ? 'bg-accent text-white' : 'text-muted hover:bg-canvas'}`}
-            >
-              {c.name}
-            </button>
-          ))}
+          <h1 className="text-[24px] font-bold tracking-tight sm:text-[28px]">Ask locals</h1>
+          <p className="mt-1 text-[15px] text-muted">Newcomers in {city?.name ?? 'your city'} ask if a quote is fair; locals answer and share what they paid.</p>
         </div>
       </header>
 

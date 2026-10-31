@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AlertTriangle, ArrowLeft, Code2, Copy, Check } from 'lucide-react';
+import { AlertTriangle, Code2, Copy, Check, MapPin } from 'lucide-react';
 import { CardGuide } from '../components/CardGuide';
 import { FairRangeCard } from '../components/FairRangeCard';
 import { LogRow, PriceTypeHelp } from '../components/LogRow';
-import { PlaceChip, PlacePicker } from '../components/PlacePicker';
+import { PlacePicker } from '../components/PlacePicker';
 import { CardSkeleton, Empty, ErrorState, ListSkeleton } from '../components/States';
+import { useAppBar } from '../lib/appbar';
 import { FAIR_RANGE_URL } from '../lib/appwrite';
 import { useContribute } from '../lib/contribute';
 import { useOnChange } from '../lib/events';
@@ -30,6 +31,19 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
   const place = usePlace();
   const contribute = useContribute();
   const [pickOpen, setPickOpen] = useState(false);
+  // The bar offers the area picker; a shared link shows its own place and offers "Use my area" instead.
+  const urlCityId = params.get('c');
+  useAppBar(
+    {
+      back: '/check',
+      action: urlCityId ? undefined : (
+        <button type="button" onClick={() => setPickOpen(true)} className="tap -mr-2 inline-flex items-center justify-center rounded-lg text-accent-ink hover:bg-canvas" aria-label="Change area">
+          <MapPin size={22} aria-hidden />
+        </button>
+      ),
+    },
+    [urlCityId],
+  );
 
   // A shared link (?c=&l=) shows that place; otherwise the user's current place.
   const item = ref.item(itemId);
@@ -72,21 +86,15 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
 
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Link href="/check" className="tap -ml-2 inline-flex items-center gap-1 rounded-lg px-2 text-[15px] font-medium text-muted hover:text-ink">
-          <ArrowLeft size={18} aria-hidden /> All items
-        </Link>
-        {!urlCity && <PlaceChip />}
-        {urlCity && (
-          <p className="text-[14px] text-muted">
-            Shared link: {locality ? `${locality.name}, ` : ''}
-            {urlCity.name}.{' '}
-            <Link href={`/item/${itemId}`} className="font-semibold text-accent-ink underline">
-              Use my area
-            </Link>
-          </p>
-        )}
-      </div>
+      {urlCity && (
+        <p className="mb-4 text-[14px] text-muted">
+          Shared link: {locality ? `${locality.name}, ` : ''}
+          {urlCity.name}.{' '}
+          <Link href={`/item/${itemId}`} className="font-semibold text-accent-ink underline">
+            Use my area
+          </Link>
+        </p>
+      )}
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] lg:items-start">
         <div className="space-y-3">

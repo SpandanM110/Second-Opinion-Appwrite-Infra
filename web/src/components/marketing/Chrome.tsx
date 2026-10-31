@@ -14,11 +14,11 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
       <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
-        <Link href="/about" className="tap flex items-center gap-2 font-semibold tracking-tight" aria-label="Second Opinion, home">
+        <Link href="/" className="tap flex items-center gap-2 font-semibold tracking-tight" aria-label="Second Opinion, home">
           <Logo />
           <span className="text-[17px]">Second Opinion</span>
         </Link>
-        <nav className={`ml-auto items-center gap-1 ${minimal ? 'hidden' : 'hidden lg:flex'}`} aria-label="Page sections">
+        <nav className={`ml-auto items-center gap-1 ${minimal ? 'hidden' : 'hidden md:flex'}`} aria-label="Page sections">
           {NAV.map(([href, label]) => (
             <Link key={href} href={href} className="tap inline-flex items-center rounded-lg px-3 text-[15px] font-medium text-muted hover:text-ink">
               {label}
@@ -29,7 +29,7 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
         <Link href="/check" className="tap ml-auto inline-flex items-center rounded-lg px-2 text-[15px] font-semibold text-accent-ink hover:underline sm:hidden">
           Open the app
         </Link>
-        <Link href="/check" className="btn-primary ml-auto hidden h-10 px-4 text-[14px] sm:inline-flex lg:ml-2">
+        <Link href="/check" className="btn-primary ml-auto hidden h-10 px-4 text-[14px] sm:inline-flex md:ml-2">
           Open the app
         </Link>
         <ThemeToggle />

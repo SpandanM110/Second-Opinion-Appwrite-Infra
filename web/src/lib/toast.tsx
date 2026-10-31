@@ -27,7 +27,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={api}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+76px)] z-[60] flex justify-center px-4 md:bottom-6" role="status" aria-live="polite">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+var(--tabs-h)+12px)] z-[60] flex justify-center px-4 md:bottom-6" role="status" aria-live="polite">
         {item && S && (
           <p key={item.id} className={`pointer-events-auto flex max-w-md items-start gap-2 rounded-2xl px-4 py-3 text-[14px] font-medium shadow-xl ${S.cls}`}>
             <S.Icon size={18} className="mt-px shrink-0" aria-hidden />

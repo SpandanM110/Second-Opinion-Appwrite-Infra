@@ -7,7 +7,6 @@ import { UNIT_LABEL } from '../core/card.js';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { ConfidenceDot, ConfidenceLegend } from '../components/ConfidenceBadge';
 import { ItemSearch } from '../components/ItemSearch';
-import { PlaceChip } from '../components/PlacePicker';
 import { Price } from '../components/Price';
 import { usePlace } from '../lib/place';
 import { fetchCityStats } from '../lib/queries';
@@ -39,10 +38,7 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
         <h1 className="text-[28px] font-bold leading-tight tracking-tight sm:text-[36px]">Check before you pay.</h1>
         <p className="mt-1 text-[16px] text-muted sm:text-[18px]">What locals really paid, near you, this month.</p>
 
-        <div className="mt-4">
-          <PlaceChip />
-        </div>
-        {place.status === 'denied' && <p className="mt-2 text-[13px] text-muted">Location is off. Tap the area chip to pick where you are.</p>}
+        {place.status === 'denied' && <p className="mt-2 text-[13px] text-muted">Location is off. Tap the area at the top to pick where you are.</p>}
         {place.status === 'outside' && <p className="mt-2 text-[13px] text-muted">We cover Bhopal, Indore and Mumbai for now. Showing {place.city?.name}.</p>}
 
         <div className="mt-4">
@@ -86,7 +82,7 @@ export function CheckPage({ initialStats }: { initialStats?: { cityId: string; r
           const items = expanded[cat.$id] ? all : all.slice(0, SHOWN);
           return (
             <div key={cat.$id}>
-              <h3 className="sticky top-14 z-10 -mx-4 mb-2 flex items-center gap-2 bg-canvas/95 px-4 py-2 text-[14px] font-semibold text-muted backdrop-blur">
+              <h3 className="sticky top-[var(--bar-h)] z-10 -mx-4 mb-2 flex items-center gap-2 bg-canvas/95 px-4 py-2 text-[14px] font-semibold text-muted backdrop-blur">
                 <CategoryIcon categoryId={cat.$id} size={16} /> {cat.name}
               </h3>
               <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2">

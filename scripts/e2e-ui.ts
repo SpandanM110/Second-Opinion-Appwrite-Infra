@@ -109,7 +109,7 @@ const typeInto = async (sel: string, value: string) => {
 
 try {
   await step('dark mode: one tap switches, it survives a reload, and the page really changes colour', async () => {
-    await page.goto(`${base}/check`, { waitUntil: 'networkidle0' });
+    await page.goto(`${base}/me`, { waitUntil: 'networkidle0' });
     const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     const before = await bg();
     await page.click('button[aria-label^="Switch to the"]');

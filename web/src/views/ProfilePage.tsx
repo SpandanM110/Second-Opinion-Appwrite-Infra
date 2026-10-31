@@ -8,6 +8,7 @@ import { fetchUser, fetchUserLogs } from '../lib/queries';
 import { useRefData } from '../lib/ref';
 import type { UserRow } from '../lib/types';
 import { isNotFound } from '../lib/appwrite';
+import { useAppBar } from '../lib/appbar';
 import { useAsync } from '../lib/useAsync';
 import { NotFound } from './NotFound';
 
@@ -18,6 +19,8 @@ export function ProfilePage({ id }: { id: string }) {
     const [user, logs] = await Promise.all([fetchUser(id), fetchUserLogs(id)]);
     return { user, logs };
   }, [id]);
+  const name = q.data?.user.display_name;
+  useAppBar({ title: name ?? 'Profile', back: '/feed' }, [name]);
 
   if (q.status === 'error') return isNotFound(q.error) ? <NotFound what="profile" /> : <ErrorState message="Couldn’t load this profile." onRetry={q.reload} />;
   if (!q.data) return <ListSkeleton rows={5} />;

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, Circle, LogIn, LogOut, Pencil, PenLine } from 'lucide-react';
+import { Check, Circle, Code2, Info, LogIn, LogOut, Pencil, PenLine } from 'lucide-react';
 import { LogRow } from '../components/LogRow';
 import { ListSkeleton } from '../components/States';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { useAuth } from '../lib/auth';
 import { friendlyAuthError } from '../lib/authErrors';
 import { useContribute } from '../lib/contribute';
@@ -23,7 +24,38 @@ const LADDER = [
 
 export function MePage() {
   const auth = useAuth();
-  return auth.status === 'in' && auth.profile ? <Dashboard /> : <SignedOut loading={auth.status === 'loading'} />;
+  return (
+    <>
+      {auth.status === 'in' && auth.profile ? <Dashboard /> : <SignedOut loading={auth.status === 'loading'} />}
+      <Settings />
+    </>
+  );
+}
+
+/** Appearance and the links that used to crowd the app bar. Shown signed in or out. */
+function Settings() {
+  return (
+    <section className="mx-auto mt-5 max-w-2xl" aria-labelledby="settings">
+      <h2 id="settings" className="mb-2 text-[16px] font-semibold">
+        Settings &amp; about
+      </h2>
+      <div className="panel divide-y divide-line">
+        <div className="flex items-center justify-between gap-3 px-4 py-2">
+          <span className="text-[15px]">Appearance</span>
+          <ThemeToggle />
+        </div>
+        <Link href="/about" className="tap flex items-center gap-3 px-4 text-[15px] hover:bg-canvas">
+          <Info size={18} className="text-muted" aria-hidden /> What is Second Opinion?
+        </Link>
+        <Link href="/api" className="tap flex items-center gap-3 px-4 text-[15px] hover:bg-canvas">
+          <Code2 size={18} className="text-muted" aria-hidden /> The fair-price API
+        </Link>
+        <Link href="/about#data" className="tap flex items-center gap-3 px-4 text-[15px] hover:bg-canvas">
+          <span className="rounded-full bg-low-soft px-2 py-px text-[11px] font-semibold text-low">demo</span> All prices are demo data for the hackathon
+        </Link>
+      </div>
+    </section>
+  );
 }
 
 function SignedOut({ loading }: { loading: boolean }) {

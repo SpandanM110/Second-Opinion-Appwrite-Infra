@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
 import { Channel, Query } from 'appwrite';
 import { MiniCard } from '../components/FairRangeCard';
 import { Price } from '../components/Price';
 import { parseCard } from '../components/QuoteCheckItem';
 import { ErrorState, ListSkeleton } from '../components/States';
+import { useAppBar } from '../lib/appbar';
 import { callWorker } from '../lib/api';
 import { client, DB, isNotFound } from '../lib/appwrite';
 import { useAuth } from '../lib/auth';
@@ -16,21 +17,24 @@ import { rupees, timeAgo, verdict } from '../lib/format';
 import { fetchQuoteCheck, fetchReplies, fetchUsers } from '../lib/queries';
 import { useRefData } from '../lib/ref';
 import { useToast } from '../lib/toast';
-import type { Reply, UserRow } from '../lib/types';
+import type { QuoteCheck, Reply, UserRow } from '../lib/types';
 import { useAsync } from '../lib/useAsync';
 import { NotFound } from './NotFound';
 
 const TONE = { warn: 'bg-warn-soft text-warn', medium: 'bg-medium-soft text-medium', high: 'bg-high-soft text-high' } as const;
 
-export function QuoteCheckPage({ id }: { id: string }) {
+/** Server-rendered first paint; the client query still runs so the page is never stale. */
+export interface QuestionInitial { qc: QuoteCheck; replies: Reply[]; users: UserRow[] }
+
+export function QuoteCheckPage({ id, initial }: { id: string; initial?: QuestionInitial }) {
   const ref = useRefData();
   const auth = useAuth();
   const toast = useToast();
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [helpfulId, setHelpfulId] = useState<string | null>(null);
-  const [replies, setReplies] = useState<Reply[]>([]);
-  const [users, setUsers] = useState<Map<string, UserRow>>(new Map());
+  const [replies, setReplies] = useState<Reply[]>(initial?.replies ?? []);
+  const [users, setUsers] = useState<Map<string, UserRow>>(() => new Map((initial?.users ?? []).map((u) => [u.$id, u])));
   const [live, setLive] = useState(false);
 
   const q = useAsync(async () => {
@@ -39,7 +43,10 @@ export function QuoteCheckPage({ id }: { id: string }) {
     setReplies(rs);
     setUsers(us);
     return qc;
-  }, [id]);
+  }, [id], initial?.qc);
+
+  const quoted = q.data?.quoted_price;
+  useAppBar({ title: quoted !== undefined ? `Is ₹${rupees(quoted)} fair?` : 'Question', back: '/feed' }, [quoted]);
 
   // Replies stream in over Realtime, filtered server-side to this Quote Check.
   useEffect(() => {
@@ -103,10 +110,6 @@ export function QuoteCheckPage({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
-      <Link href={`/feed?city=${qc.city_id}`} className="tap -ml-2 inline-flex items-center gap-1 rounded-lg px-2 text-[15px] font-medium text-muted hover:text-ink">
-        <ArrowLeft size={18} aria-hidden /> {city?.name} feed
-      </Link>
-
       <article className="panel space-y-4 p-4 sm:p-6">
         <p className="text-[14px] text-faint">
           {item?.name} · {locality?.name ?? city?.name}

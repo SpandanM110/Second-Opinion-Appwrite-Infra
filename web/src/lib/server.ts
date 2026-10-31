@@ -4,7 +4,7 @@ import { Query } from 'appwrite';
 import { buildCard, stateIdOf } from '../core/card.js';
 import { DB, ENDPOINT, PROJECT_ID } from './appwrite';
 import { splitRecent } from './recentPrices';
-import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, QuoteCheck, UserRow } from './types';
+import type { Card, Category, City, Item, Locality, PriceLog, PriceStat, QuoteCheck, Reply, UserRow } from './types';
 
 // Server-side reads: plain REST calls so Next's fetch cache can hold reference data.
 // Everything read here is public (read("any")), so no API key is involved.
@@ -92,4 +92,16 @@ export async function getLogs(itemId: string, cityId: string, localityId: string
 export async function getUsersFor(userIds: string[]) {
   const ids = [...new Set(userIds)];
   return ids.length ? rest<UserRow>('users', [Query.equal('$id', ids), Query.limit(100)], 120) : [];
+}
+
+/** One question with its answers and everyone involved, for the server-rendered first paint of /q/[id]. */
+export async function getQuestion(id: string) {
+  const [qcs, replies] = await Promise.all([
+    rest<QuoteCheck>('quote_checks', [Query.equal('$id', id), Query.limit(1)], LOGS_CACHE),
+    rest<Reply>('replies', [Query.equal('quote_check_id', id), Query.orderAsc('created_at'), Query.limit(100)], LOGS_CACHE),
+  ]);
+  const qc = qcs[0];
+  if (!qc) return null;
+  const users = await getUsersFor([qc.user_id, ...replies.map((r) => r.user_id)]);
+  return { qc, replies, users };
 }

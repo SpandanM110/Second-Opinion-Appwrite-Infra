@@ -67,6 +67,8 @@ Designed so a stranger on a phone gets an answer before an explanation:
 4. **Contribute** only when there is something to say: the sign-in sheet says why, and the draft survives sign-in.
 5. **Me**: a checklist from first price to trusted local, never a bare score.
 
+**Getting around.** The app bar shows the area you are checking (one chip sets it for every screen) or, on a card, question or profile, a back arrow and the title. The bottom bar is Check · Ask · Share · Me, with Share as the raised centre button on every page; Compare is one tap from the Check page and from any card. Theme and "what is this?" live on Me.
+
 ## How it works
 
 ```mermaid

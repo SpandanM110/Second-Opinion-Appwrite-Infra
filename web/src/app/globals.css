@@ -143,6 +143,10 @@
 }
 
 @layer base {
+  :root {
+    --bar-h: 56px; /* app bar; sticky offsets use it */
+    --tabs-h: 64px; /* bottom tab bar on phones; the toast sits above it */
+  }
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;

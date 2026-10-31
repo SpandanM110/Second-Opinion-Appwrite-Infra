@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { AlertTriangle, ArrowLeftRight, Clock, CloudOff, MapPin, MessageCircleQuestion, PenLine } from 'lucide-react';
 import type { Card, CardOk } from '../lib/types';
 import { timeAgo } from '../lib/format';
@@ -88,8 +89,13 @@ function Body({ card, guide, onPickArea }: { card: CardOk; guide?: ReactNode; on
         </p>
       )}
 
-      <p className="flex items-center gap-1.5 text-[12px] text-faint">
-        <Clock size={13} aria-hidden /> Newest price {timeAgo(card.sample.newestLogAt)}
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-faint">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock size={13} aria-hidden /> Newest price {timeAgo(card.sample.newestLogAt)}
+        </span>
+        <Link href="/about#data" className="rounded-full bg-low-soft px-2 py-px text-[11px] font-semibold text-low hover:bg-line" title="Seeded for the hackathon demo. Tap to see how.">
+          demo data
+        </Link>
       </p>
     </>
   );

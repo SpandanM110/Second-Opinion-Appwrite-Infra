@@ -167,6 +167,9 @@ function Dashboard() {
           <button type="button" onClick={() => setEditing((e) => !e)} className="tap inline-flex items-center justify-center rounded-xl text-muted hover:bg-canvas" aria-label="Edit profile" aria-expanded={editing}>
             <Pencil size={18} />
           </button>
+          <button type="button" onClick={() => void auth.signOut()} className="tap inline-flex items-center justify-center rounded-xl text-muted hover:bg-canvas" aria-label="Sign out" title="Sign out">
+            <LogOut size={18} />
+          </button>
         </div>
 
         {editing && (

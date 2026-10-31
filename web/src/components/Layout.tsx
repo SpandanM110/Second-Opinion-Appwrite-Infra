@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { ArrowLeft, Home, MessageCircleQuestion, PenLine, UserRound } from 'lucide-react';
+import { ArrowLeft, Home, LogIn, MessageCircleQuestion, PenLine, UserRound } from 'lucide-react';
 import { AppBarProvider, useAppBarState } from '../lib/appbar';
+import { useAuth } from '../lib/auth';
 import { useContribute } from '../lib/contribute';
 import { useBack, useNavigationCounter } from '../lib/nav';
 import { useRefData } from '../lib/ref';
@@ -38,6 +39,8 @@ function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const ref = useRefData();
   const contribute = useContribute();
+  const auth = useAuth();
+  const signedIn = auth.status === 'in' && Boolean(auth.profile);
   const bar = useAppBarState();
   useNavigationCounter();
   const root = ROOT.test(pathname);
@@ -61,7 +64,8 @@ function Shell({ children }: { children: ReactNode }) {
                 <span className={`text-[17px] ${pathname.startsWith('/me') ? '' : 'hidden sm:inline'}`}>Second Opinion</span>
               </Link>
               {/* The one piece of context every screen depends on: where you are checking. */}
-              {!pathname.startsWith('/me') && <PlaceChip className="min-w-0 max-w-[62vw] sm:max-w-xs" />}
+              {!pathname.startsWith('/me') && <PlaceChip className="min-w-0 max-w-[50vw] sm:max-w-xs" />}
+              <AuthControl className="ml-auto md:hidden" />
             </>
           ) : (
             <>
@@ -86,6 +90,7 @@ function Shell({ children }: { children: ReactNode }) {
                 {label}
               </Link>
             ))}
+            <AuthControl className="ml-1" />
             <button type="button" onClick={() => void contribute.openLog()} className="btn-primary ml-2 h-10 px-4 text-[14px]">
               <PenLine size={16} aria-hidden /> Share a price
             </button>
@@ -145,7 +150,7 @@ function Shell({ children }: { children: ReactNode }) {
             </button>
           </li>
           {TABS.slice(2).map((t) => (
-            <Tab key={t.to} {...t} active={isActive(pathname, t.to)} />
+            <Tab key={t.to} {...t} label={signedIn ? t.label : 'Sign in'} Icon={signedIn ? t.Icon : LogIn} active={isActive(pathname, t.to)} />
           ))}
         </ul>
       </nav>
@@ -165,5 +170,25 @@ function Tab({ to, label, Icon, active }: (typeof TABS)[number] & { active: bool
         {label}
       </Link>
     </li>
+  );
+}
+
+/** Signed out: a "Sign in" link that opens the sheet. Signed in: your initial, which goes to Me. */
+function AuthControl({ className = '' }: { className?: string }) {
+  const auth = useAuth();
+  if (auth.status === 'loading') return <span className={`size-9 ${className}`} aria-hidden />;
+  if (auth.status === 'in' && auth.profile) {
+    return (
+      <Link href="/me" className={`tap inline-flex items-center justify-center ${className}`} aria-label={`Signed in as ${auth.profile.display_name}. Open your profile`} title={auth.profile.display_name}>
+        <span className="flex size-9 items-center justify-center rounded-full bg-accent-soft text-[15px] font-bold text-accent-ink" aria-hidden>
+          {auth.profile.display_name.slice(0, 1).toUpperCase()}
+        </span>
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={() => void auth.require('default')} className={`tap inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2 text-[15px] font-semibold text-accent-ink hover:underline ${className}`}>
+      <LogIn size={18} aria-hidden /> Sign in
+    </button>
   );
 }

@@ -88,12 +88,18 @@ export function MiniProof({ card, href }: { card: CardOk; href: string }) {
   return (
     <Link href={href} className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-3 shadow-sm lg:hidden">
       <span className="min-w-0">
-        <span className="block truncate text-[13px] text-muted">
-          {card.item.name} · {card.scope.label}
+        <span className="flex items-center gap-1.5 text-[13px] text-muted">
+          <span className="truncate">
+            {card.item.name} · {card.scope.label}
+          </span>
+          <span className="shrink-0 rounded-full bg-low-soft px-1.5 text-[10px] font-semibold text-low">demo</span>
         </span>
         <span className="num mt-0.5 block text-[14px] text-muted">
           most paid <b className="text-ink">{band(card.range.p25, card.range.p75)}</b> · {card.confidence.level} confidence
         </span>
+        {card.overcharge && (
+          <span className="num mt-0.5 block text-[13px] font-medium text-warn">first quotes here average {card.overcharge.index.toFixed(1)}x that</span>
+        )}
       </span>
       <span className="flex shrink-0 items-center gap-1">
         <Price value={card.range.median} size="lg" />

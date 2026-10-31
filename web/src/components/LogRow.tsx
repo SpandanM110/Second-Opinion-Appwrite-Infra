@@ -17,7 +17,7 @@ import { Price } from './Price';
 
 const TYPE_STYLE = {
   paid: 'bg-high-soft text-high',
-  quoted: 'bg-warn-soft text-warn',
+  quoted: 'bg-medium-soft text-medium',
   listed: 'bg-scope-city-soft text-scope-city',
 } as const;
 
@@ -135,7 +135,7 @@ export function LogRow({ log, author, showItem = false, hideLocality = false }: 
 export function PriceTypeHelp() {
   return (
     <p className="text-[12px] leading-relaxed text-faint">
-      <b className="font-semibold text-high">paid</b> = what they handed over · <b className="font-semibold text-warn">quoted</b> = what they were asked first ·{' '}
+      <b className="font-semibold text-high">paid</b> = what they handed over · <b className="font-semibold text-medium">quoted</b> = what they were asked first ·{' '}
       <b className="font-semibold text-scope-city">listed</b> = on a board or menu
     </p>
   );

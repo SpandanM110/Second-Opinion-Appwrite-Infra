@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ArrowLeftRight, CircleHelp, Home, Newspaper, PenLine, UserRound } from 'lucide-react';
 import { useContribute } from '../lib/contribute';
 import { useRefData } from '../lib/ref';
@@ -24,6 +24,14 @@ export function Layout({ children }: { children: ReactNode }) {
   const contribute = useContribute();
   // The card has its own "Add my price"; Me and the question page have their own actions.
   const showFab = !pathname.startsWith('/item') && !pathname.startsWith('/me') && !pathname.startsWith('/q/');
+  // Once the page is scrolled the label has been read; a round button covers less of the list underneath.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 120);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
 
   return (
     <div className="min-h-dvh pb-[calc(env(safe-area-inset-bottom)+84px)] md:pb-6">
@@ -102,9 +110,11 @@ export function Layout({ children }: { children: ReactNode }) {
         <button
           type="button"
           onClick={() => void contribute.openLog()}
-          className="btn-primary fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-20 h-12 rounded-full px-5 shadow-lg md:bottom-6"
+          className={`btn-primary fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] right-4 z-20 h-12 rounded-full shadow-lg transition-all md:bottom-6 ${scrolled ? 'w-12 px-0' : 'px-5'}`}
+          aria-label="Share a price"
         >
-          <PenLine size={18} aria-hidden /> Share a price
+          <PenLine size={18} aria-hidden />
+          <span className={scrolled ? 'sr-only' : ''}>Share a price</span>
         </button>
       )}
 

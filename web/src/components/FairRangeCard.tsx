@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, ArrowLeftRight, Clock, CloudOff, MessageCircleQuestion, PenLine } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { AlertTriangle, ArrowLeftRight, Clock, CloudOff, MapPin, MessageCircleQuestion, PenLine } from 'lucide-react';
 import type { Card, CardOk } from '../lib/types';
 import { timeAgo } from '../lib/format';
 import { band, Price } from './Price';
@@ -13,10 +14,12 @@ interface Actions {
   onPaid: () => void;
   onAsk: () => void;
   onCompare: () => void;
+  /** Opens the area picker. Offered when the number is for the whole city and a more local one is possible. */
+  onPickArea?: () => void;
 }
 
 /** Card anatomy, top to bottom, exactly as in the build plan's UI section. */
-export function FairRangeCard({ card, staleSince, actions }: { card: Card; staleSince?: string; actions: Actions }) {
+export function FairRangeCard({ card, staleSince, actions, guide }: { card: Card; staleSince?: string; actions: Actions; guide?: ReactNode }) {
   return (
     <article className="panel overflow-hidden" aria-labelledby="card-title">
       <div className="space-y-4 p-4 sm:p-6">
@@ -33,7 +36,7 @@ export function FairRangeCard({ card, staleSince, actions }: { card: Card; stale
           </p>
         )}
 
-        {card.status === 'ok' ? <Body card={card} /> : <NoData message={card.message} onPaid={actions.onPaid} />}
+        {card.status === 'ok' ? <Body card={card} guide={guide} onPickArea={actions.onPickArea} /> : <NoData message={card.message} onPaid={actions.onPaid} />}
       </div>
 
       {card.status === 'ok' && (
@@ -47,11 +50,18 @@ export function FairRangeCard({ card, staleSince, actions }: { card: Card; stale
   );
 }
 
-function Body({ card }: { card: CardOk }) {
+function Body({ card, guide, onPickArea }: { card: CardOk; guide?: ReactNode; onPickArea?: () => void }) {
   const { range, confidence, scope } = card;
   return (
     <>
-      <ScopeChip type={scope.type} label={scope.label} fallback={scope.fallback} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <ScopeChip type={scope.type} label={scope.label} fallback={scope.fallback} />
+        {scope.type !== 'locality' && onPickArea && (
+          <button type="button" onClick={onPickArea} className="tap -my-2 inline-flex items-center gap-1 rounded-lg px-1 text-[13px] font-semibold text-accent-ink hover:underline">
+            <MapPin size={14} aria-hidden /> Pick your area for a local price
+          </button>
+        )}
+      </div>
 
       <div>
         <Price value={range.median} size="hero" />
@@ -64,6 +74,8 @@ function Body({ card }: { card: CardOk }) {
       <RangeBar {...range} />
 
       <ConfidenceBadge level={confidence.level} reason={confidence.reason} />
+
+      {guide}
 
       <UseIt card={card} />
 

@@ -42,13 +42,13 @@ export function ConfidenceBadge({ level, reason, compact = false }: { level: Con
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls={id}
-        className="tap -mx-1 flex w-full items-center gap-2 rounded-xl px-1 text-left"
+        className="tap -mx-1 flex w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-xl px-1 text-left"
       >
         <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold ${cls}`}>
           <Icon size={15} aria-hidden /> {label}
         </span>
-        <span className="min-w-0 flex-1 text-[14px] text-muted">{reason}</span>
-        <ChevronDown size={16} className={`shrink-0 text-faint transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <ChevronDown size={16} className={`ml-auto shrink-0 text-faint transition-transform sm:order-last ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <span className="w-full min-w-0 text-[14px] text-muted sm:w-auto sm:flex-1">{reason}</span>
       </button>
       {open && (
         <p id={id} className="mt-1 rounded-xl bg-canvas px-3 py-2 text-[13px] leading-relaxed text-muted">

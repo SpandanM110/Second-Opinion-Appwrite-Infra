@@ -45,10 +45,7 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
       <section className="px-4 pb-10 pt-8 sm:pb-16 sm:pt-14" aria-labelledby="hero-title">
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-[13px] font-semibold text-accent-ink">
-              Bhopal · Indore · Mumbai
-            </p>
-            <h1 id="hero-title" className="mt-4 text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[52px]">
+            <h1 id="hero-title" className="text-[36px] font-bold leading-[1.08] tracking-tight sm:text-[52px]">
               Know the fair price before you pay.
             </h1>
             <p className="mt-4 max-w-xl text-[18px] leading-relaxed text-muted">
@@ -64,12 +61,12 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
               <div>
                 <p className="mb-2 text-[13px] font-semibold text-muted">What are you about to pay for?</p>
                 <LandingSearch rows={cityRows} />
-                <p className="mt-2 text-[13px] text-faint">Try “auto”, “plumber”, “haircut” or “चाय”. No account needed.</p>
+                <p className="mt-2 text-[13px] text-faint">No account needed.</p>
               </div>
             </div>
           </div>
 
-          <div aria-label="A real example">
+          <div aria-label="A real example" className="hidden lg:block">
             {card ? (
               <>
                 <p className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-muted">
@@ -81,26 +78,11 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
           </div>
         </div>
         {card && (
-          <div className="mx-auto mt-8 max-w-5xl rounded-2xl bg-surface p-4 sm:p-6">
+          <div className="mx-auto mt-8 hidden max-w-5xl rounded-2xl bg-surface p-4 sm:p-6 lg:block">
             <h2 className="mb-3 text-[15px] font-semibold">How to read that card</h2>
             <CardNotes withQuotes={Boolean(card.overcharge)} />
           </div>
         )}
-      </section>
-
-      {/* 2 · The problem */}
-      <section className="border-y border-line bg-surface px-4 py-12 sm:py-16" aria-labelledby="problem">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 id="problem" className="text-[28px] font-bold tracking-tight sm:text-[36px]">
-            No meter. No menu. No price.
-          </h2>
-          <p className="mt-4 text-[17px] leading-relaxed text-muted">
-            Most everyday purchases in an Indian city have no listed price. The same auto ride, plumber visit or haircut costs different people very different amounts, and the people who know least, newcomers and travellers, pay the most.
-          </p>
-          <p className="mt-3 text-[17px] leading-relaxed text-muted">
-            The knowledge exists. Locals have it. It has just never been written down anywhere you can search.
-          </p>
-        </div>
       </section>
 
       {/* 3 · How it works */}
@@ -109,20 +91,20 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
           <h2 id="how-title" className="text-[28px] font-bold tracking-tight sm:text-[36px]">
             How it works
           </h2>
-          <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 lg:grid-cols-4">
             {[
               { Icon: Search, t: 'Check', d: 'Search the item. See the fair price for your area, and how far to trust it.' },
               { Icon: Scale, t: 'Use it', d: 'Know where to start, what to settle at, and when to walk away. Or ask locals if a quote is fair.' },
               { Icon: PenLine, t: 'Share', d: 'Paid something? Add it in 20 seconds. The next person benefits.' },
               { Icon: ShieldCheck, t: 'Verify', d: 'Locals confirm or flag prices. Three flags and a bad number is out.' },
             ].map(({ Icon, t, d }, i) => (
-              <li key={t} className="panel p-5">
+              <li key={t} className="panel p-4 sm:p-5">
                 <span className="flex size-10 items-center justify-center rounded-xl bg-accent-soft text-accent-ink">
                   <Icon size={20} aria-hidden />
                 </span>
                 <p className="mt-3 text-[13px] font-semibold text-faint">Step {i + 1}</p>
-                <h3 className="text-[18px] font-semibold">{t}</h3>
-                <p className="mt-1 text-[15px] leading-relaxed text-muted">{d}</p>
+                <h3 className="text-[17px] font-semibold sm:text-[18px]">{t}</h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-muted sm:text-[15px]">{d}</p>
               </li>
             ))}
           </ol>
@@ -179,7 +161,7 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
             Not another AI guess
           </h2>
           <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-muted">
-            An assistant can tell you a city is expensive and give good bargaining tips. What it can’t tell you is what people paid for this exact ride this month, because that was never written down where it can read it. That’s the layer we’re building.
+            An assistant can give bargaining tips. It can’t tell you what people paid for this exact ride this month, because nobody wrote it down. We do.
           </p>
           <div className="mt-8 hidden overflow-hidden rounded-2xl border border-line bg-surface md:block">
             <table className="w-full text-left text-[15px]">
@@ -267,7 +249,7 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
               You already know what things cost.
             </h2>
             <p className="mt-3 text-[17px] leading-relaxed text-muted">
-              You paid ₹100 for the auto and nobody else will ever know it was fair. Logging takes about 20 seconds: pick the item, type the amount, save. Your price helps the next newcomer, and your standing grows each time a neighbour confirms it.
+              Sharing a price takes about 20 seconds: pick the item, type the amount, save. It helps the next newcomer, and your standing grows each time a neighbour confirms it.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Link href="/u/seed-u01" className="btn-secondary">See a trusted local’s profile</Link>
@@ -312,7 +294,7 @@ export function Landing({ card, cardHref, cityRows, coverage, apiUrl }: LandingP
               <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-panel-ink/10 p-4 text-[13px] leading-relaxed"><code>curl "{apiUrl}"</code></pre>
             </div>
             {sample && (
-              <div className="min-w-0">
+              <div className="hidden min-w-0 lg:block">
                 <p className="mb-2 text-[13px] font-semibold text-panel-ink/70">Response (shortened)</p>
                 <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-panel-ink/10 p-4 text-[13px] leading-relaxed"><code>{sample}</code></pre>
               </div>

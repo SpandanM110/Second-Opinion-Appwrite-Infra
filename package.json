@@ -18,6 +18,7 @@
     "test:ui": "node scripts/with-key.mjs npx tsx scripts/e2e-ui.ts",
     "a11y": "node scripts/a11y.mjs",
     "perf": "node scripts/perf.mjs",
+    "shots": "node scripts/shots.mjs",
     "prune": "node scripts/prune-deployments.mjs"
   },
   "devDependencies": {

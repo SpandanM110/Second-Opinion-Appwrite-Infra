@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Code2, Copy, Check } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Code2, Copy, Check } from 'lucide-react';
 import { CardGuide } from '../components/CardGuide';
 import { FairRangeCard } from '../components/FairRangeCard';
 import { LogRow, PriceTypeHelp } from '../components/LogRow';
-import { PlaceChip } from '../components/PlacePicker';
+import { PlaceChip, PlacePicker } from '../components/PlacePicker';
 import { CardSkeleton, Empty, ErrorState, ListSkeleton } from '../components/States';
 import { FAIR_RANGE_URL } from '../lib/appwrite';
 import { useContribute } from '../lib/contribute';
@@ -29,6 +29,7 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
   const ref = useRefData();
   const place = usePlace();
   const contribute = useContribute();
+  const [pickOpen, setPickOpen] = useState(false);
 
   // A shared link (?c=&l=) shows that place; otherwise the user's current place.
   const item = ref.item(itemId);
@@ -91,18 +92,20 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
         <div className="space-y-3">
           {!card && cardQ.status === 'loading' && <CardSkeleton />}
           {!card && cardQ.status === 'error' && ref.ready && <ErrorState message="Couldn’t load the fair range." onRetry={cardQ.reload} />}
-          {card?.status === 'ok' && <CardGuide defaultOpen={!(initial?.guideDismissed ?? true)} />}
           {card && (
             <FairRangeCard
               card={card}
               staleSince={cardQ.data?.stale ? cardQ.data.fetchedAt : undefined}
+              guide={card.status === 'ok' ? <CardGuide defaultOpen={!(initial?.guideDismissed ?? true)} /> : undefined}
               actions={{
                 onPaid: () => void contribute.openLog(itemId),
                 onAsk: () => void contribute.openAsk(itemId),
                 onCompare: () => router.push(`/compare/${itemId}${city ? `?a=${city.$id}` : ''}`),
+                onPickArea: urlCity ? undefined : () => setPickOpen(true),
               }}
             />
           )}
+          {!urlCity && <PlacePicker open={pickOpen} onClose={() => setPickOpen(false)} />}
         </div>
 
         <aside className="space-y-4">
@@ -135,8 +138,11 @@ export function ItemPage({ itemId, initial }: { itemId: string; initial?: ItemIn
                     ))}
                 </ul>
                 {logsQ.data.logs.some((l) => l.price_type === 'quoted') && (
-                  <div className="mt-3 rounded-xl bg-warn-soft/60 px-3 pb-1 pt-3">
-                    <h3 className="text-[14px] font-semibold text-warn">First quotes people were given here</h3>
+                  <div className="mt-3 rounded-xl bg-medium-soft/50 px-3 pb-1 pt-3">
+                    <h3 className="flex items-center gap-1.5 text-[14px] font-semibold text-medium">
+                      <AlertTriangle size={15} aria-hidden />
+                      {card?.status === 'ok' && card.overcharge ? `First quotes here: ${card.overcharge.index.toFixed(1)}x the fair price` : 'First quotes people were given here'}
+                    </h3>
                     <p className="text-[12px] text-muted">Not fair prices: what sellers asked before any bargaining.</p>
                     <ul className="divide-y divide-line/70">
                       {logsQ.data.logs

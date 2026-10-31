@@ -25,7 +25,11 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
             </Link>
           ))}
         </nav>
-        <Link href="/check" className="btn-primary ml-auto h-10 px-4 text-[14px] lg:ml-2">
+        {/* On phones the hero is the call to action, so the header only needs a link. */}
+        <Link href="/check" className="tap ml-auto inline-flex items-center rounded-lg px-2 text-[15px] font-semibold text-accent-ink hover:underline sm:hidden">
+          Open the app
+        </Link>
+        <Link href="/check" className="btn-primary ml-auto hidden h-10 px-4 text-[14px] sm:inline-flex lg:ml-2">
           Open the app
         </Link>
         <ThemeToggle />

@@ -49,6 +49,34 @@ export function weightedQuantiles(points, qs) {
   });
 }
 
+function weightedMedianLog(points) {
+  return weightedQuantiles(points.map((p) => ({ ...p, price: Math.log(p.price) })), [0.5])[0];
+}
+
+export function weightedLogMedianTrend(points, nowMs) {
+  const ok = points.filter((p) => p.w > 0 && p.price > 0);
+  const ageDays = (p) => (nowMs - new Date(p.at).getTime()) / DAY_MS;
+  const recent = ok.filter((p) => {
+    const d = ageDays(p);
+    return d >= 0 && d < 30;
+  });
+  const prior = ok.filter((p) => {
+    const d = ageDays(p);
+    return d >= 30 && d <= WINDOW_DAYS;
+  });
+
+  if (recent.length < 3 || prior.length < 3) return { trend: 'unknown', trend_pct: null };
+
+  const m30 = weightedMedianLog(recent);
+  const m90 = weightedMedianLog(prior);
+  if (m30 == null || m90 == null) return { trend: 'unknown', trend_pct: null };
+
+  const pct = Math.round((Math.exp(m30 - m90) - 1) * 100);
+  if (pct > 5) return { trend: 'rising', trend_pct: pct };
+  if (pct < -5) return { trend: 'falling', trend_pct: pct };
+  return { trend: 'stable', trend_pct: pct };
+}
+
 export function median(nums) {
   if (nums.length === 0) return null;
   const s = [...nums].sort((a, b) => a - b);
@@ -180,6 +208,8 @@ export function computeAll({ logs, users, confirmations, flags, cities, now = ne
         ? round2(median(g.quoted) / median(g.paid))
         : null;
 
+    const { trend, trend_pct } = weightedLogMedianTrend(g.range, nowMs);
+
     stats.push({
       item_id: g.item_id,
       scope_type: g.scope_type,
@@ -195,6 +225,8 @@ export function computeAll({ logs, users, confirmations, flags, cities, now = ne
       newest_log_at: new Date(newest).toISOString(),
       oldest_log_at: new Date(oldest).toISOString(),
       confidence: confidenceFor({ nWeighted, distinctUsers, spread, newestAgeDays: (nowMs - newest) / DAY_MS }),
+      trend,
+      trend_pct,
       overcharge_index: overcharge,
       computed_at: now.toISOString(),
     });

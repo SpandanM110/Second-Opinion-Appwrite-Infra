@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeAll, weightedQuantiles, reputation, logWeight, confidenceFor } from './engine.js';
+import { computeAll, weightedQuantiles, weightedLogMedianTrend, reputation, logWeight, confidenceFor } from './engine.js';
 import { buildCard } from './card.js';
 import { resolveLocation, haversineKm } from './geo.js';
 import { checkPrice, cleanName, cleanText } from './rules.js';
@@ -72,6 +72,60 @@ test('quoted logs feed only the overcharge index', () => {
 test('logs outside 90 days are excluded', () => {
   const { stats } = computeAll({ logs: [log({ created_at: daysAgo(91) })], users: [], confirmations: [], flags: [], cities, now: NOW });
   assert.equal(stats.length, 0);
+});
+
+test('trend helper: unknown when either window has < 3 logs', () => {
+  const points = [
+    { price: 100, w: 1, at: daysAgo(1) },
+    { price: 100, w: 1, at: daysAgo(2) },
+    { price: 100, w: 1, at: daysAgo(31) },
+    { price: 100, w: 1, at: daysAgo(40) },
+    { price: 100, w: 1, at: daysAgo(50) },
+  ];
+  assert.deepEqual(weightedLogMedianTrend(points, NOW.getTime()), { trend: 'unknown', trend_pct: null });
+});
+
+test('trend helper: rising/falling/stable based on weighted log-median shift', () => {
+  const rising = [
+    { price: 120, w: 1, at: daysAgo(1) },
+    { price: 120, w: 1, at: daysAgo(2) },
+    { price: 120, w: 1, at: daysAgo(3) },
+    { price: 100, w: 1, at: daysAgo(31) },
+    { price: 100, w: 1, at: daysAgo(40) },
+    { price: 100, w: 1, at: daysAgo(50) },
+  ];
+  assert.deepEqual(weightedLogMedianTrend(rising, NOW.getTime()), { trend: 'rising', trend_pct: 20 });
+
+  const falling = [
+    { price: 90, w: 1, at: daysAgo(1) },
+    { price: 90, w: 1, at: daysAgo(2) },
+    { price: 90, w: 1, at: daysAgo(3) },
+    { price: 100, w: 1, at: daysAgo(31) },
+    { price: 100, w: 1, at: daysAgo(40) },
+    { price: 100, w: 1, at: daysAgo(50) },
+  ];
+  assert.deepEqual(weightedLogMedianTrend(falling, NOW.getTime()), { trend: 'falling', trend_pct: -10 });
+
+  const stable = [
+    { price: 104, w: 1, at: daysAgo(1) },
+    { price: 104, w: 1, at: daysAgo(2) },
+    { price: 104, w: 1, at: daysAgo(3) },
+    { price: 100, w: 1, at: daysAgo(31) },
+    { price: 100, w: 1, at: daysAgo(40) },
+    { price: 100, w: 1, at: daysAgo(50) },
+  ];
+  assert.deepEqual(weightedLogMedianTrend(stable, NOW.getTime()), { trend: 'stable', trend_pct: 4 });
+});
+
+test('computeAll includes trend fields on each stats row', () => {
+  const logs = [
+    ...[120, 120, 120].map((price, i) => log({ price, user_id: `r${i}`, created_at: daysAgo(1 + i) })),
+    ...[100, 100, 100].map((price, i) => log({ price, user_id: `p${i}`, created_at: daysAgo(31 + i * 5) })),
+  ];
+  const { stats } = computeAll({ logs, users: [], confirmations: [], flags: [], cities, now: NOW });
+  const loc = stats.find((s) => s.scope_type === 'locality');
+  assert.equal(loc.trend, 'rising');
+  assert.equal(loc.trend_pct, 20);
 });
 
 const item = { $id: 'auto', name: 'Auto ride', unit: 'per_km' };
